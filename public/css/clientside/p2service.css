@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-wrap: anywhere;
+    font-family: Poppins;
+    line-height: normal;
+
+}
+
+:root {
+    --navItem-bgColor: #0050B1;
+    --main-black: #000000;
+    --main-white: #ffffff;
+    --gray-txt: #717171;
+    --blue-txt-color: #0050B1;
+    --right-sideBg-color: #EEF4FB;
+    --codBg-color: #2A2A2A;
+    --code-pink-color: #FF03AF;
+    --code-yellow-color: #ED9E00;
+    --border-boxes: #C0C0C0;
+    --boxes-background: linear-gradient(180deg, rgba(107, 174, 255, 0.2) -23.75%, rgba(35, 193, 207, 0.2) 76.25%);
+    --box-text-secondary: #022179;
+}
+
+.comment-text {
+    color: #07a059;
+}
+
+.blue-text-color{
+    color: var(--box-text-secondary);
+}
+
+
+
+.left-section {
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    overflow-wrap: break-word;
+}
+
+.group-1 p {
+    overflow-wrap: anywhere;
+
+}
+
+.pink-text {
+    color: var(--code-pink-color);
+}
+
+.yellow-text {
+    color: var(--code-yellow-color);
+}
+
+.box-text-secondary {
+    color: var(--box-text-secondary);
+}
+
+
+
+.box-header svg {
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.bottom-headers {
+    margin-top: 10rem;
+}
+
+
+.box-header {
+    background-color: transparent;
+    border: 1px solid #C0C0C0;
+    padding: 0.5rem 1rem;
+    box-shadow: 4px 4px 20px 0px #00000012;
+}
+
+.box-content {
+    padding: 1rem 0;
+    background: var(--boxes-background);
+    box-shadow: 4px 4px 20px 0px #00000012;
+    border: 1px solid #C0C0C0
+}
+
+.box-content p {
+    margin-bottom: 0 !important;
+    padding: 0.3rem 1rem;
+
+
+}
+
+.hidden {
+    display: none;
+}
+
+.expand-button {
+    border-radius: 2rem;
+    background: linear-gradient(90deg, rgba(21, 91, 198, 0.2) 0%, rgba(35, 193, 207, 0.2) 100%);
+    padding: 1rem 2rem;
+    margin: 1rem 0;
+    margin-right: 2rem !important;
+}
+
+.collapse-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+}
+
+.collapse-content.show {
+    max-height: 1000vh;
+    /* big enough to fit all content */
+    opacity: 1;
+}
+
+.country-grid table tbody td {
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 50%;
+
+}
+
+
+/* .sidenav{
+    position: fixed;
+    z-index: 1;
+} */
+/* .header-menu{
+    position: fixed;
+    width: 100%;
+    z-index: 2;
+    padding: 0;
+    margin-bottom: 20px;
+    background-color: var(--right-sideBg-color);
+} */
+.right-side-screen {
+    position: absolute;
+    left: 18%;
+}
+
+.bottom-headers-p3 {
+    margin-top: 10vh;
+}
+
+
+
+.country-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.country-grid {
+    border-collapse: collapse;
+    width: 100%;
+    border-spacing: 0;
+}
+
+.country-grid th,
+.country-grid tr,
+.country-grid td {
+    border: none;
+
+}
+
+
+.country-grid th {
+    font-weight: 500;
+    padding: 4px 6px;
+
+}
+
+
+.font-500 {
+    font-weight: 500;
+}
+
+@media (min-width:992px) {
+    .progress-vertical {
+        position: relative;
+    }
+
+    .progress-vertical .steps {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 2.25rem;
+        /* space for markers */
+    }
+
+    .progress-vertical .step {
+        position: relative;
+        padding-bottom: 3.25rem;
+        padding-right: 2vw;
+        /* space under each item */
+    }
+
+    /* connecting line */
+    .progress-vertical .step::before {
+        content: "";
+        position: absolute;
+        left: -1.85rem;
+        /* centers under the circle (matches marker left + radius - half line width) */
+        top: 1.6rem;
+        /* starts just under the circle */
+        bottom: -0.6rem;
+        /* little extra to reach next circle */
+        border: 1px solid #AEAEAE;
+        width: 0;
+        /* Bootstrap primary-ish with some opacity */
+    }
+
+    .progress-vertical .step:last-child::before {
+        display: none;
+        /* no line after the last step */
+    }
+
+    /* circle marker */
+    .progress-vertical .marker {
+        position: absolute;
+        left: -2.5rem;
+        top: 0.2rem;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 9999px;
+        border: 2px solid #0d6efd;
+        /* bootstrap primary */
+        background: #fff;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.08);
+        /* subtle halo */
+    }
+
+    /* tick for completed */
+    .progress-vertical .step.completed .marker {
+        background: #0050B1;
+        border-color: #0050B1;
+    }
+
+    .progress-vertical .step.completed .marker::after {
+        content: "✓";
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.85rem;
+        line-height: 1;
+    }
+
+    /* current (hollow) */
+    .progress-vertical .step.current .marker {
+        background: #fff;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 5px rgba(13, 110, 253, 0.15);
+    }
+
+    /* text spacing */
+    .progress-vertical .body>*:first-child {
+        margin-top: 0;
+    }
+
+    .progress-vertical .body>*:last-child {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width:1600px) {
+    .bottom-headers {
+        margin-top: 15rem;
+    }
+}
+
+@media (max-width:1279px) {
+    .bottom-headers {
+        margin-top: 25rem;
+    }
+
+    .expand-button {
+
+        padding: 0.9rem 0.9rem;
+    }
+}
+
+/* For <= 640px */
+@media (max-width: 575.98px) {
+    .country-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        justify-content: center;
+    }
+
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+    .country-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+}
+
+
+@media (max-width:992px) {
+    .bottom-headers {
+        margin-top: 20rem;
+    }
+
+    li.step.completed::marker {
+        content: none;
+    }
+
+    ol {
+        padding-left: 0rem;
+    }
+}
+
+
+
+@media (max-width:992px) {
+    .left-section {
+        max-width: 100%;
+    }
+
+    .bottom-headers {
+        margin-top: 2rem;
+    }
+
+    .expand-button {
+
+        padding: 1rem 2.4rem;
+    }
+}
+
+@media (max-width:400px) {
+
+    .expand-button {
+
+        padding: 0.5rem 2.4rem;
+    }
+
+    ol {
+        padding-left: 0rem;
+    }
+}

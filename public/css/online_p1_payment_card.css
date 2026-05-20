@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+ }
+
+ body{
+  overflow: hidden;
+  font-family: "Poppins", serif;
+ }
+
+/* color variables */
+:root {
+  --main-color:#22bfce;
+  --main-white: #ffffff;
+  --main-red: #be3144;
+  --main-blue: #45567d;
+  --header-dasboard:#FAF7FF;
+  --main-black: #000000;
+  --sidebar-txt: #35415A;
+  --header-dasboard-txt:#4a6267;
+}
+
+/* Utility classes  */
+
+   /* ================= Right Side css ========== */
+   .payment-card-left-side-wrap{
+    background-color: #21b9c8cc;
+    height: 90vh;
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+
+   }
+   .payment-card-right-side-wrap{
+    background-color: aliceblue;
+    height: 90vh;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+
+   }
+   .pay-cart{
+    height: 250px;
+    width: 400px;
+    border: 1px solid white;
+   }
+
+   .pay-page-logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 50px;
+   }
+   .pay-page-logo img{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100px;
+    object-fit: civer;
+   }
+   .pay-img-wrapper img{
+    height: 60px;
+    width: 80px;
+    border-radius: 5px;
+    text-align: end;
+   }

@@ -1,0 +1,303 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+.table-container {
+    max-height: 75vh;
+    overflow: scroll;
+}
+
+.statusDanger,
+.statusSuccess,
+.statuswarning {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-size: 1rem;
+}
+
+.statusSuccess {
+    background-color: #06872C;
+}
+
+.statuswarning {
+    background-color: #D78708;
+}
+
+.statusDanger {
+    background: #EA1619;
+}
+
+/* Keep table cells centering like normal */
+.status-col {
+    vertical-align: middle !important;
+}
+
+/* Flex only the inner wrapper, not the <td> */
+.status-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    /* fills the cell height when the row grows */
+    width: 100%;
+}
+
+/* Make badges consistent and non-baseline aligned */
+.statusSuccess,
+.statuswarning,
+.statusDanger {
+    display: inline-flex;
+    /* fixes baseline wobble */
+    align-items: center;
+    justify-content: center;
+    padding: .5rem 1rem;
+    border-radius: 9999px;
+    line-height: 1;
+    /* avoids extra vertical space */
+    white-space: nowrap;
+    /* keep label on one line */
+    font-size: .875rem;
+}
+
+
+.table-container::-webkit-scrollbar {
+    display: none;
+}
+
+.custom-table {
+    /* border-collapse: separate; */
+    border-spacing: 0;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-row {
+    padding: 20px !important;
+}
+
+.custom-table thead th {
+    background: #0050B1;
+    font-weight: bold;
+    font-size: 18px;
+    color: #ffffff;
+}
+
+.table-data {
+    font-family: Poppins;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.all-trans-table {
+    border-radius: 20px;
+    table-layout: auto;
+    border-collapse: collapse;
+    margin-bottom: 0 !important;
+}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+.footer-text {
+    color: #000;
+    font-family: Roboto;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.pagination-box {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: normal;
+}
+
+.pagination-box-active {
+    border-radius: 5px;
+    background-color: #022179;
+    color: white;
+    padding: 0.4rem 0.8rem;
+
+}
+
+a {
+    text-decoration: none;
+}
+
+.pagination-box-inactive {
+    border-radius: 5px;
+    border: 1px solid #022179;
+    padding: 0.3rem 0.6rem;
+}
+
+.table-container {
+    max-height: 75vh;
+    overflow: scroll;
+    border-radius: 20px;
+    border: 1px solid #B8B8B8;
+    background: #FFF;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.table-container::-webkit-scrollbar {
+    display: none;
+}
+
+
+
+.custom-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.table-row {
+    padding: 20px !important;
+}
+
+.custom-table thead th {
+    background: #0050B1;
+    font-weight: bold;
+    font-size: 18px;
+    color: #ffffff;
+    border: 1px solid #0050B1;
+}
+
+.table-data {
+    font-family: Poppins;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.all-trans-table {
+
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.all-trans-table thead th {
+
+    white-space: nowrap;
+}
+
+.all-trans-table thead td {
+    border: 0 !important;
+    border-bottom-width: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+.ind-card {
+    border-radius: 20px;
+    background: linear-gradient(90deg, rgba(21, 91, 198, 0.20) 0%, rgba(35, 193, 207, 0.20) 100%);
+    box-shadow: 5px 5px 20px 0 rgba(0, 0, 0, 0.07);
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+}
+
+.card-el-head {
+    color: #5C5C5C;
+    font-family: Roboto;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.card-el-content {
+    color: #000;
+    font-family: Poppins;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.currency {
+    color: #000;
+    font-family: Poppins;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.break {
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all;
+
+}
+
+.admin-db-heading,
+.admin-db-subheading {
+    Font-family: Poppins;
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 48px;
+}
+
+
+/* media query  */
+/* moble device  */
+@media screen and (max-width: 575.98px) {
+    .right-img {
+        display: none;
+    }
+
+    .form-control {
+        padding: 10px;
+    }
+
+    .submit-btn {
+        padding: 7px;
+    }
+
+    .right-img {
+        display: none;
+    }
+
+
+    .submit-btn {
+        padding: 7px;
+    }
+
+
+    .statusDanger,
+    .statusSuccess,
+    .statuswarning {
+        padding: 0.5rem 1rem;
+        color: #FFF;
+        text-align: center;
+        font-family: Poppins;
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+    .footer-text {
+        font-size: 16px;
+    }
+
+    .admin-db-heading,
+    .admin-db-subheading {
+        font-size: 18px;
+        line-height: 30px;
+    }
+}

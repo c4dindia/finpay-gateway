@@ -1,0 +1,147 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+:root {
+    --navItem-bgColor: #0050B1;
+    --main-black: #000000;
+    --main-white: #ffffff;
+    --gray-txt: #717171;
+    --blue-txt-color: #0050B1;
+    --right-sideBg-color: #EEF4FB;
+}
+
+label {
+    font-weight: 600;
+}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+.submit-btn {
+    background-color: var(--navItem-bgColor);
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    color: var(--main-white);
+    font-size: 20px;
+}
+
+.rc-cstm-label {
+    font-family: Poppins;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 30px;
+}
+
+.reg-form-img {
+    gap: 10vw;
+}
+
+.reg-heading {
+    Font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 48px;
+}
+
+/* media query  */
+/* moble device  */
+@media screen and (max-width: 575.98px) {
+
+    .reg-heading {
+        font-size: 22px;
+    }
+
+    .rc-cstm-label {
+        font-size: 16px;
+    }
+
+    .submit-btn {
+        font-size: 16px;
+    }
+
+    .form-control {
+        padding: 10px !important;
+    }
+
+    .submit-btn {
+        padding: 7px;
+    }
+}
+
+@media (min-width:1200px) {
+    .reg-form-img {
+        gap: 4vw;
+    }
+}
+
+@media (min-width:1600px) {
+    .reg-form-img {
+        margin-left: 5vw;
+    }
+
+}
+
+
+@media (min-width:1200px) and (max-width:1599px) {
+    .right-img {
+        width: 35vw;
+    }
+
+    .reg-form-img {
+        gap: 5vw;
+        margin-left: 3vw;
+    }
+
+    .right-img-add {
+        width: 35vw !important;
+    }
+
+}
+
+@media (min-width:922px) and (max-width:1199px) {
+    .right-img {
+        width: 50vw;
+    }
+
+    .reg-form-img {
+        gap: 0vw;
+    }
+
+
+}
+
+@media (max-width:992px) {
+    .reg-form {
+        width: 90%;
+    }
+
+    .right-img {
+        width: 90%;
+    }
+
+    .reg-form-img {
+        gap: 0vw;
+    }
+}
+
+@media (max-width:413px) {
+    .reg-heading {
+        font-size: 1.75rem;
+
+    }
+}
+
+@media (max-width:369px) {
+    .reg-heading {
+        font-size: 1.4rem;
+
+    }
+}

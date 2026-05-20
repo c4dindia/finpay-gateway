@@ -1,0 +1,135 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+:root {
+    --navItem-bgColor: #0050B1;
+    --main-black: #000000;
+    --main-white: #ffffff;
+    --gray-txt: #717171;
+    --blue-txt-color: #0050B1;
+    --right-sideBg-color: #EEF4FB;
+}
+
+label {
+    font-family: Poppins;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 30px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+}
+
+.submit-btn {
+    background-color: var(--navItem-bgColor);
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    border: none;
+    color: var(--main-white);
+    font-size: 20px;
+}
+
+.add-form-img {
+    gap: 10vw;
+}
+
+.add-heading {
+    Font-family: "Poppins", sans-serif;
+    font-weight: 500;
+    font-size: 32px;
+    line-height: 48px;
+}
+
+.right-img-add {
+    width: 90%;
+}
+
+/* media query  */
+/* moble device  */
+@media screen and (max-width: 575.98px) {
+
+    .form-control {
+        padding: 10px !important;
+    }
+
+    .submit-btn {
+        padding: 7px;
+    }
+
+    .add-heading {
+        font-size: 20px !important;
+        line-height: 37px;
+    }
+
+    label {
+        font-size: 16px;
+    }
+
+    .submit-btn {
+        font-size: 16px;
+    }
+}
+
+@media (min-width:1600px) {
+    .add-form-img {
+        margin-left: 5vw;
+    }
+
+}
+
+@media (min-width:1200px) and (max-width:1599px) {
+
+
+    .add-form-img {
+        margin-left: 3vw;
+    }
+
+}
+
+
+@media (max-width:991.98px) {
+    .add-form {
+        width: 90%;
+    }
+
+    .add-form-img {
+        gap: 0vw;
+    }
+
+    .add-heading {
+        font-size: 30px;
+    }
+
+
+}
+
+@media (max-width:413px) {
+    .add-heading {
+        font-size: 1.5rem;
+
+    }
+}
+
+@media (max-width:369px) {
+    .add-heading {
+        font-size: 1.4rem;
+    }
+
+    .add-select-company {
+        font-size: 0.9rem;
+    }
+}
+
+
+@media (min-width:1200px) {
+    .add-form-img {
+        gap: 4vw;
+    }
+}
