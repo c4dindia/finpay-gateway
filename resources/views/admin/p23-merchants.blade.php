@@ -165,19 +165,26 @@ $currentPage = 'Manage VPAs';
                             <input type="checkbox" disabled>
                             @endif
                         </td>
+
                         <td class="table-data text-center" style="border:1px solid #B8B8B8;">
                             {{ $company->mid }}
                         </td>
+
                         <td class="table-data text-center d-flex justify-content-around align-items-center" style="border:1px solid #B8B8B8;">
                             {{ $company->vpa }}
-                            <a href="{{ url('/admin/p23-merchants/generate-link/'.$company->id) }}" target="_blank" class="btn btn-sm link-generate-btn" title="Generate Link"><i class="fa fa-up-right-from-square"></i></a>
+                            <a href="{{ url('/admin/p23-merchants/generate-link/'.$company->id) }}" target="_blank" class="btn btn-sm link-generate-btn" title="Generate Link">
+                                <i class="fa fa-up-right-from-square"></i>
+                            </a>
                         </td>
+
                         <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
                             {{ number_format($company->limitPerDay, 2) ?? '-' }}
                         </td>
+
                         <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
                             {{ number_format($company->totalSpends, 2) ?? 0 }}
                         </td>
+
                         <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
                             {{ $company->startDate ? \Carbon\Carbon::parse($company->startDate)->format('d M Y') : '-' }}
                         </td>
@@ -185,89 +192,104 @@ $currentPage = 'Manage VPAs';
                         <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
                             {{ $company->endDate ? \Carbon\Carbon::parse($company->endDate)->format('d M Y') : '-' }}
                         </td>
+
                         <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
                             {{ number_format($company->successRate, 2) ?? 0 }} %
                         </td>
-                        <td style="border:1px solid #B8B8B8; border-right:0;" class="table-data text-center @if($company->status == '1')text-success @else text-danger @endif">@if($company->status == '1') Active @else Deactivated @endif</td>
-                        <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
-                            <a href="#" class="btn btn-sm edit-btn" title="Edit Merchant" data-bs-toggle="modal" data-bs-target="#edit-modal-{{ $company->id }}"><i class="fa fa-edit"></i></a>
 
-                            @if($company->status == '0')
-                            <a href="{{ route('delete-p23merchant', $company->id) }}" class="btn btn-sm text-danger" title="Delete Merchant" onclick="return confirm('Are you sure you want to delete?');"><i class="fa fa-trash"></i></a>
-                            @endif
+                        <td style="border:1px solid #B8B8B8; border-right:0;" class="table-data text-center @if($company->status == '1') text-success @else text-danger @endif">
+                            @if($company->status == '1') Active @else Deactivated @endif
                         </td>
 
-                        <div class="modal fade" id="edit-modal-{{ $company->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Merchant Details</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
+                        <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
+                            <a href="#" class="btn btn-sm edit-btn" title="Edit Merchant" data-bs-toggle="modal" data-bs-target="#edit-modal-{{ $company->id }}">
+                                <i class="fa fa-edit"></i>
+                            </a>
 
-                                    <div class="modal-body">
-                                        <form action="{{ route('edit-p23merchant') }}" method="POST">
-                                            @csrf
+                            @if($company->status == '0')
+                            <a href="{{ route('delete-p23merchant', $company->id) }}" class="btn btn-sm text-danger" title="Delete Merchant" onclick="return confirm('Are you sure you want to delete?');">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                            @endif
+                        </td>
+                    </tr>
+                    @endforeach
 
-                                            <input type="hidden" name="merchant_id" value="{{ $company->id }}">
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="mid" class="form-label">MID</label>
-                                                    <input type="text" name="mid" class="form-control" id="mid" value="{{ $company->mid }}" disabled>
-                                                </div>
-
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="vpa" class="form-label">VPA</label>
-                                                    <input type="text" name="vpa" class="form-control" id="vpa" value="{{ $company->vpa }}" disabled>
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="limitPerDay" class="form-label">Daily Limit</label>
-                                                    <input type="text" name="limitPerDay" class="form-control" id="limitPerDay" value="{{ $company->limitPerDay }}" required>
-                                                </div>
-
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="limitPerMonth" class="form-label">Monthly Limit</label>
-                                                    <input type="text" name="limitPerMonth" class="form-control" id="limitPerMonth" value="{{ $company->limitPerMonth }}">
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="limitPerYear" class="form-label">Yearly Limit</label>
-                                                    <input type="text" name="limitPerYear" class="form-control" id="limitPerYear" value="{{ $company->limitPerYear }}">
-                                                </div>
-
-                                                <div class="col-md-6 mb-3">
-                                                    <label for="status" class="form-label">Status</label>
-                                                    <select class="form-select" name="status" id="status" required>
-                                                        <option value="1" @if($company->status == '1') selected @endif>Active</option>
-                                                        <option value="0" @if($company->status == '0') selected @endif>Deactivate</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary">Update</button>
-                                    </div>
+                    @for ($i = count($merchants); $i < 15; $i++)
+                        <tr class="pad">
+                        <td colspan="10" style="border:none !important;">&nbsp;</td>
+                        </tr>
+                        @endfor
+                </tbody>
+            </table>
         </form>
-    </div>
-</div>
-</div>
 
-</tr>
-@endforeach
-@for ($i = count($merchants); $i < 15; $i++)
-    <tr class="pad">
-    <td colspan="5" style="border:none !important;">&nbsp;</td>
-    </tr>
-    @endfor
-    </tbody>
-    </table>
-    </form>
+        @foreach ($merchants as $company)
+        <div class="modal fade" id="edit-modal-{{ $company->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+
+                    <form action="{{ route('edit-p23merchant') }}" method="POST">
+                        @csrf
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Merchant Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <input type="hidden" name="merchant_id" value="{{ $company->id }}">
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="mid-{{ $company->id }}" class="form-label">MID</label>
+                                    <input type="text" name="mid" class="form-control" id="mid-{{ $company->id }}" value="{{ $company->mid }}" disabled>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="vpa-{{ $company->id }}" class="form-label">VPA</label>
+                                    <input type="text" name="vpa" class="form-control" id="vpa-{{ $company->id }}" value="{{ $company->vpa }}" disabled>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="limitPerDay-{{ $company->id }}" class="form-label">Daily Limit</label>
+                                    <input type="text" name="limitPerDay" class="form-control" id="limitPerDay-{{ $company->id }}" value="{{ $company->limitPerDay }}" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="limitPerMonth-{{ $company->id }}" class="form-label">Monthly Limit</label>
+                                    <input type="text" name="limitPerMonth" class="form-control" id="limitPerMonth-{{ $company->id }}" value="{{ $company->limitPerMonth }}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="limitPerYear-{{ $company->id }}" class="form-label">Yearly Limit</label>
+                                    <input type="text" name="limitPerYear" class="form-control" id="limitPerYear-{{ $company->id }}" value="{{ $company->limitPerYear }}">
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="status-{{ $company->id }}" class="form-label">Status</label>
+                                    <select class="form-select" name="status" id="status-{{ $company->id }}" required>
+                                        <option value="1" @if($company->status == '1') selected @endif>Active</option>
+                                        <option value="0" @if($company->status == '0') selected @endif>Deactivate</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+        @endforeach
     </div>
 
     <!-- for mobile and tab -->
