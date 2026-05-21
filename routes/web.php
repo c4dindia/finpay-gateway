@@ -15,6 +15,7 @@ use App\Http\Controllers\PaystraxController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RyvylController;
 use App\Http\Controllers\SecurePayZoneController;
+use App\Http\Controllers\SettlementController;
 use App\Http\Controllers\StradaPayController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransvoucherController;
@@ -117,6 +118,9 @@ Route::middleware(['auth','check.status'])->group(function () {
     
     Route::get('/admin/all-transactions',[CompanyController::class,'showAllTransactions'])->name('showAllTransactions');
     Route::get('/admin/all-declined-transactions',[CompanyController::class,'showAllFailedTransactions'])->name('showAllFailedTransactions');
+
+    Route::get('/admin/settlements',[SettlementController::class,'showSettlements'])->name('showSettlements');
+    Route::post('/admin/settlements/add',[SettlementController::class,'addSettlement'])->name('addSettlement');
 });
 
 //client side dashbard pages

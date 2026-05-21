@@ -69,9 +69,9 @@ $currentPage = 'All Transactions';
                     @php $selectedService = request('service', 'all'); @endphp
                     <select name="service" class="form-select trans-select" onchange="this.form.submit()">
                         <option value="all" {{ $selectedService === 'all' ? 'selected' : '' }}> All Services</option>
-                        <option value="p12" {{ $selectedService === 'p12' ? 'selected' : '' }}>P-12 2D/3D</option>
+                        {{-- <option value="p12" {{ $selectedService === 'p12' ? 'selected' : '' }}>P-12 2D/3D</option>
                         <option value="p17" {{ $selectedService === 'p17' ? 'selected' : '' }}>P-17 Dire</option>
-                        <option value="p22" {{ $selectedService === 'p22' ? 'selected' : '' }}>P-22 Uniqo Pay</option>
+                        <option value="p22" {{ $selectedService === 'p22' ? 'selected' : '' }}>P-22 Uniqo Pay</option> --}}
                         <option value="p23" {{ $selectedService === 'p23' ? 'selected' : '' }}>P-23 UPI</option>
                     </select>
                 </div>

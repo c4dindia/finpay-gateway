@@ -117,6 +117,10 @@
                                 class="nav-link" href="{{ route('showAllFailedTransactions') }}"><i
                                     class="fa-solid fa-cash-register"></i>&nbsp;Decline Transaction</a>
                         </li>
+                        <li class="nav-item @if ($currentPage == 'Settlements') active @endif"><a
+                                class="nav-link" href="{{ route('showSettlements') }}"><i
+                                    class="fa-solid fa-money-bill-wave"></i>&nbsp;Settlements</a>
+                        </li>
                     </ul>
                 </div>
 
@@ -162,6 +166,8 @@
                     <li class="nav-item @if ($currentPage == 'All Declined Transactions') active @endif"><a
                             class="nav-link" href="{{ route('showAllFailedTransactions') }}"><i
                                 class="fa-solid fa-cash-register"></i>&nbsp; Decline Transactions</a></li>
+                    <li class="nav-item @if ($currentPage == 'Settlements') active @endif"><a class="nav-link"
+                            href="{{ route('showSettlements') }}"><i class="fa-solid fa-money-bill-wave"></i>&nbsp; Settlements</a></li>
                 </ul>
             </div>
 
