@@ -217,7 +217,7 @@
     </nav>
 
     <div class="content">
-        <div class="fd-sidenav d-none d-lg-flex flex-column p-3">
+        <div class="fd-sidenav fd-admin-sidenav d-none d-lg-flex flex-column p-3">
             <div class="d-flex align-items-center justify-content-center fd-sidenav-brand-wrap">
                 <div class="fd-brand" style="height: 75px;">
                     <img alt="Finpay" src="{{ asset('images/fin-group-logo.svg') }}">

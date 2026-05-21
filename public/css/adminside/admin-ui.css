@@ -10,34 +10,19 @@
     min-height: 100vh;
 }
 
-.fd-admin-page .fd-sidenav .fd-sidenav-brand-wrap,
-.fd-admin-page .fd-sidenav .admin-logo {
-    position: static !important;
-    top: auto !important;
-    width: 100% !important;
-    padding: 0 0 12px !important;
-    background: transparent !important;
+/* Admin sidebar only (.fd-admin-sidenav) — client keeps 224px via .fd-sidenav */
+.content > .fd-admin-sidenav {
+    width: 252px !important;
+    min-width: 252px !important;
 }
 
-.fd-admin-page .fd-sidenav .fd-sidenav-nav,
-.fd-admin-page .fd-sidenav .nav-pills {
-    margin-top: 0 !important;
-}
-
-.fd-admin-page .fd-sidenav.admin-sidenav,
-.fd-admin-page .sidenav.admin-sidenav {
-    inset: auto !important;
-    width: 224px !important;
-    min-width: 224px !important;
-}
-
-.fd-admin-page .client-main-content.admin-main-content {
-    width: calc(100% - 224px) !important;
-    margin-left: 224px !important;
+.content > .fd-admin-sidenav ~ .admin-main-content {
+    width: calc(100% - 252px) !important;
+    margin-left: 252px !important;
 }
 
 @media (max-width: 991.98px) {
-    .fd-admin-page .client-main-content.admin-main-content {
+    .content > .fd-admin-sidenav ~ .admin-main-content {
         width: 100% !important;
         margin-left: 0 !important;
     }
@@ -47,13 +32,13 @@
     min-height: calc(100vh - 100px);
 }
 
-.fd-admin-page .fd-sidenav .nav {
+.content > .fd-admin-sidenav .nav {
     gap: 6px;
     overflow-y: auto;
     padding-right: 2px;
 }
 
-.fd-admin-page .fd-sidenav .nav::-webkit-scrollbar {
+.content > .fd-admin-sidenav .nav::-webkit-scrollbar {
     width: 0;
 }
 
@@ -452,8 +437,23 @@
 }
 
 .fd-admin-page .reg-form,
-.fd-admin-page .add-form {
+.fd-admin-page .add-form,
+.fd-admin-page .settlements-form {
     padding: 28px;
+}
+
+.fd-admin-page .settlements-form-title {
+    font-family:
+        "Plus Jakarta Sans",
+        "Poppins",
+        system-ui,
+        -apple-system,
+        sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--fd-ink) !important;
+    margin: 0 0 20px;
 }
 
 .fd-admin-page .table-container {
@@ -1817,7 +1817,8 @@
 
 @media (max-width: 991.98px) {
     .fd-admin-page .reg-form,
-    .fd-admin-page .add-form {
+    .fd-admin-page .add-form,
+    .fd-admin-page .settlements-form {
         padding: 22px;
     }
 
