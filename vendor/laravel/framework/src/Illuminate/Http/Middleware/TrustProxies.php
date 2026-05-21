@@ -50,9 +50,15 @@ class TrustProxies
         $trustedIps = $this->proxies() ?: config('trustedproxy.proxies');
 
         if (is_null($trustedIps) &&
-            (($_ENV['LARAVEL_CLOUD'] ?? false) === '1' ||
-            ($_SERVER['LARAVEL_CLOUD'] ?? false) === '1')) {
+            (laravel_cloud() ||
+             str_ends_with($request->host(), '.on-forge.com') ||
+             str_ends_with($request->host(), '.on-vapor.com'))) {
             $trustedIps = '*';
+        }
+
+        if (str_ends_with($request->host(), '.on-forge.com') ||
+            str_ends_with($request->host(), '.on-vapor.com')) {
+            $request->headers->remove('X-Forwarded-Host');
         }
 
         if ($trustedIps === '*' || $trustedIps === '**') {

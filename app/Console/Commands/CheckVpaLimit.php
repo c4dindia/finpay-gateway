@@ -8,9 +8,6 @@ use App\Models\UPIPayment;
 use App\Models\UpiMerchant;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use App\Http\Controllers\UpiPaymentController;
 
 class CheckVpaLimit extends Command
 {
@@ -31,79 +28,78 @@ class CheckVpaLimit extends Command
     /**
      * Execute the console command.
      */
-
-    protected $baseUrl = "https://gatewayeng.azure-api.net/upi/api";
-    protected $subscriptionKey = "1ceb19d850404bac9ae417b1ba0a4191";
-
     public function handle()
     {
         // Check for expired transactions
-        $transactions = Transaction::where('status', 'p23')
+        Transaction::where('status', 'p23')
             ->where('payment_status', 'Pending')
             ->whereNotNull('payment_id')
-            ->get();
+            ->where('created_at', '<=', Carbon::now()->subMinutes(config('services.p23.payment_expiry_minutes')))
+            ->update([
+                'payment_status' => 'Expired',
+            ]);
 
-        foreach ($transactions as $trans) {
-            $client = new Client();
+        // Check for VPA limits
+        // $merchantLimits = UpiMerchant::where('status', '1')
+        //     ->whereNotNull('limitPerDay')
+        //     ->pluck('limitPerDay', 'vpa')
+        //     ->toArray();
 
-            try {
-                $path = $this->baseUrl . "/1.0/checktxndetails";
+        // $exceedVpa = Transaction::where('status', 'p23')
+        //     ->where('payment_status', 'Completed')
+        //     ->whereNotNull('card_number')
+        //     ->whereBetween('created_at', [
+        //         Carbon::today()->startOfDay(),
+        //         Carbon::today()->endOfDay(),
+        //     ])
+        //     ->select('card_number')
+        //     ->selectRaw('SUM(amount) as total_amount')
+        //     ->groupBy('card_number')
+        //     ->get()
+        //     ->filter(function ($txn) use ($merchantLimits) {
+        //         $vpa = $txn->card_number;
 
-                $payload = [
-                    "txnid" => $trans->payment_id,
-                    "clientrefid" => $trans->customer_details,
-                ];
+        //         if (!isset($merchantLimits[$vpa])) {
+        //             return false;
+        //         }
 
-                $upiController = app(UpiPaymentController::class);
+        //         return $txn->total_amount >= $merchantLimits[$vpa];
+        //     })
+        //     ->pluck('card_number')
+        //     ->toArray();
 
-                $token = $upiController->accessToken();
-                $checkSum = $upiController->generateChecksum($payload);
+        // if (empty($exceedVpa)) {
+        //     $this->info('No VPA exceed the limit');
+        //     return;
+        // }
 
-                $response = $client->post($path, [
-                    'headers' => [
-                        'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
-                        'Content-Type' => 'application/json',
-                        'Authorization' => 'Bearer ' . $token,
-                    ],
-                    'json' => [
-                        "payload" => $payload,
-                        "checksum" => $checkSum,
-                    ],
-                ]);
+        // $oldAccounts = UPIPayment::whereIn('vpa', $exceedVpa)
+        //     ->where('status', '1')
+        //     ->get();
 
-                $data = json_decode($response->getBody(), true);
+        // foreach ($oldAccounts as $oldAccount) {
+        //     $newMerchant = UpiMerchant::where('status', '1')
+        //         ->whereNotIn('vpa', $exceedVpa)
+        //         ->orderByRaw("CASE WHEN mid = ? THEN 0 ELSE 1 END", [$oldAccount->mid])
+        //         ->orderBy('id', 'asc')
+        //         ->first();
 
-                if ($response->getStatusCode() === 200 && ($data['errorMsg'] ?? null) === "SUCCESS") {
-                    $status = strtolower($data['response']['txnStatus'] ?? '');
+        //     if (!$newMerchant) {
+        //         $oldAccount->mid = null;
+        //         $oldAccount->vpa = null;
+        //         $oldAccount->status = '0';
+        //         $oldAccount->save();
 
-                    if (strtolower($status) === 'success') {
-                        $trans->payment_status = 'Completed';
-                    } elseif (strtolower($status) === 'generated') {
-                        $trans->payment_status = 'Pending';
-                    } else {
-                        $trans->payment_status = ucfirst(strtolower($status));
-                    }
+        //         $this->info('No Merchant Found');
+        //         continue;
+        //     }
 
-                    $createdAt = $trans->created_at->timestamp;
-                    $expiresAt = $createdAt + (config('services.p23.payment_expiry_minutes') * 60); // expiry minutes
-                    $isExpired = time() > $expiresAt;
+        //     $oldAccount->mid = $newMerchant->mid;
+        //     $oldAccount->vpa = $newMerchant->vpa;
+        //     $oldAccount->status = '1';
+        //     $oldAccount->save();
+        // }
 
-                    if ($isExpired && $trans->payment_status == 'Pending') {
-                        $trans->payment_status = 'Expired';
-                    }
-
-                    $trans->save();
-                } else {
-                    Log::error('UPI Cron: Transaction status API failed', [
-                        'checkout_id' => $trans->checkout_id
-                    ]);
-                }
-            } catch (RequestException $e) {
-                Log::error('UPI Cron: Transaction status request exception', [
-                    'checkout_id' => $trans->checkout_id,
-                    'error' => $e->getMessage()
-                ]);
-            }
-        }
+        // $this->info('VPA Updated Successfully');
     }
 }

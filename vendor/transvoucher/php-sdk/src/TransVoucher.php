@@ -7,12 +7,12 @@ use TransVoucher\Http\Client;
 
 /**
  * TransVoucher PHP SDK
- *
+ * 
  * @property PaymentService $payments
  */
 class TransVoucher
 {
-    public const API_VERSION = 'v1.0';
+    public const string API_VERSION = 'v1.0';
 
     /**
      * @var Client
@@ -91,7 +91,7 @@ class TransVoucher
     private function validateConfig(array $config): void
     {
         $required = ['api_key', 'api_secret'];
-
+        
         foreach ($required as $key) {
             if (empty($config[$key])) {
                 throw new Exception\TransVoucherException("Missing required config: {$key}");
@@ -137,7 +137,7 @@ class TransVoucher
 
         // Set base URL based on environment if not explicitly provided
         if (!$merged['base_url']) {
-            $merged['base_url'] = $merged['environment'] === 'sandbox'
+            $merged['base_url'] = $merged['environment'] === 'sandbox' 
                 ? 'https://sandbox-api.transvoucher.com/' . self::API_VERSION
                 : 'https://api.transvoucher.com/' . self::API_VERSION;
         }
@@ -158,4 +158,4 @@ class TransVoucher
     {
         $this->payments = new PaymentService($this->client);
     }
-}
+} 

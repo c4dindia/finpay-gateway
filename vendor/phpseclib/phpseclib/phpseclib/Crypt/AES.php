@@ -11,13 +11,13 @@
  * just a wrapper to Rijndael.php you may consider using Rijndael.php instead of
  * to save one include_once().
  *
- * If {@link \phpseclib\Crypt\AES::setKeyLength() setKeyLength()} isn't called, it'll be calculated from
- * {@link \phpseclib\Crypt\AES::setKey() setKey()}.  ie. if the key is 128-bits, the key length will be 128-bits.  If it's 136-bits
- * it'll be null-padded to 192-bits and 192 bits will be the key length until {@link \phpseclib\Crypt\AES::setKey() setKey()}
+ * If {@link self::setKeyLength() setKeyLength()} isn't called, it'll be calculated from
+ * {@link self::setKey() setKey()}.  ie. if the key is 128-bits, the key length will be 128-bits.  If it's 136-bits
+ * it'll be null-padded to 192-bits and 192 bits will be the key length until {@link self::setKey() setKey()}
  * is called, again, at which point, it'll be recalculated.
  *
  * Since \phpseclib\Crypt\AES extends \phpseclib\Crypt\Rijndael, some functions are available to be called that, in the context of AES, don't
- * make a whole lot of sense.  {@link \phpseclib\Crypt\AES::setBlockLength() setBlockLength()}, for instance.  Calling that function,
+ * make a whole lot of sense.  {@link self::setBlockLength() setBlockLength()}, for instance.  Calling that function,
  * however possible, won't do anything (AES has a fixed block length whereas Rijndael has a variable one).
  *
  * Here's a short example of how to use this library:
@@ -49,8 +49,6 @@
 
 namespace phpseclib\Crypt;
 
-use phpseclib\Crypt\Rijndael;
-
 /**
  * Pure-PHP implementation of AES.
  *
@@ -67,7 +65,7 @@ class AES extends Rijndael
      *
      * @see \phpseclib\Crypt\Rijndael::setBlockLength()
      * @access public
-     * @param Integer $length
+     * @param int $length
      */
     function setBlockLength($length)
     {
@@ -82,47 +80,17 @@ class AES extends Rijndael
      *
      * @see \phpseclib\Crypt\Rijndael:setKeyLength()
      * @access public
-     * @param Integer $length
+     * @param int $length
      */
     function setKeyLength($length)
     {
-        switch ($length) {
-            case 160:
-                $length = 192;
-                break;
-            case 224:
-                $length = 256;
-        }
         parent::setKeyLength($length);
-    }
-
-    /**
-     * Sets the key.
-     *
-     * Rijndael supports five different key lengths, AES only supports three.
-     *
-     * @see \phpseclib\Crypt\Rijndael:setKey()
-     * @see setKeyLength()
-     * @access public
-     * @param String $key
-     */
-    function setKey($key)
-    {
-        parent::setKey($key);
-
-        if (!$this->explicit_key_length) {
-            $length = strlen($key);
-            switch (true) {
-                case $length <= 16:
-                    $this->key_size = 16;
-                    break;
-                case $length <= 24:
-                    $this->key_size = 24;
-                    break;
-                default:
-                    $this->key_size = 32;
-            }
-            $this->_setEngine();
+        switch ($this->key_length) {
+            case 20:
+                $this->key_length = 24;
+                break;
+            case 28:
+                $this->key_length = 32;
         }
     }
 }

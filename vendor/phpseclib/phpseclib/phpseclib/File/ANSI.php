@@ -32,7 +32,7 @@ class ANSI
     /**
      * Max Width
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $max_x;
@@ -40,7 +40,7 @@ class ANSI
     /**
      * Max Height
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $max_y;
@@ -48,7 +48,7 @@ class ANSI
     /**
      * Max History
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $max_history;
@@ -56,7 +56,7 @@ class ANSI
     /**
      * History
      *
-     * @var Array
+     * @var array
      * @access private
      */
     var $history;
@@ -64,7 +64,7 @@ class ANSI
     /**
      * History Attributes
      *
-     * @var Array
+     * @var array
      * @access private
      */
     var $history_attrs;
@@ -72,7 +72,7 @@ class ANSI
     /**
      * Current Column
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $x;
@@ -80,7 +80,7 @@ class ANSI
     /**
      * Current Row
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $y;
@@ -88,7 +88,7 @@ class ANSI
     /**
      * Old Column
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $old_x;
@@ -96,7 +96,7 @@ class ANSI
     /**
      * Old Row
      *
-     * @var Integer
+     * @var int
      * @access private
      */
     var $old_y;
@@ -104,7 +104,7 @@ class ANSI
     /**
      * An empty attribute cell
      *
-     * @var Object
+     * @var object
      * @access private
      */
     var $base_attr_cell;
@@ -112,7 +112,7 @@ class ANSI
     /**
      * The current attribute cell
      *
-     * @var Object
+     * @var object
      * @access private
      */
     var $attr_cell;
@@ -120,7 +120,7 @@ class ANSI
     /**
      * An empty attribute row
      *
-     * @var Array
+     * @var array
      * @access private
      */
     var $attr_row;
@@ -128,7 +128,7 @@ class ANSI
     /**
      * The current screen text
      *
-     * @var Array
+     * @var array
      * @access private
      */
     var $screen;
@@ -136,7 +136,7 @@ class ANSI
     /**
      * The current screen attributes
      *
-     * @var Array
+     * @var array
      * @access private
      */
     var $attrs;
@@ -144,7 +144,7 @@ class ANSI
     /**
      * Current ANSI code
      *
-     * @var String
+     * @var string
      * @access private
      */
     var $ansi;
@@ -152,7 +152,7 @@ class ANSI
     /**
      * Tokenization
      *
-     * @var Array
+     * @var array
      * @access private
      */
     var $tokenization;
@@ -184,8 +184,8 @@ class ANSI
      *
      * Resets the screen as well
      *
-     * @param Integer $x
-     * @param Integer $y
+     * @param int $x
+     * @param int $y
      * @access public
      */
     function setDimensions($x, $y)
@@ -203,8 +203,7 @@ class ANSI
     /**
      * Set the number of lines that should be logged past the terminal height
      *
-     * @param Integer $x
-     * @param Integer $y
+     * @param int $history
      * @access public
      */
     function setHistory($history)
@@ -215,7 +214,7 @@ class ANSI
     /**
      * Load a string
      *
-     * @param String $source
+     * @param string $source
      * @access public
      */
     function loadString($source)
@@ -227,7 +226,7 @@ class ANSI
     /**
      * Appdend a string
      *
-     * @param String $source
+     * @param string $source
      * @access public
      */
     function appendString($source)
@@ -272,7 +271,7 @@ class ANSI
                     case "\x1B[K": // Clear screen from cursor right
                         $this->screen[$this->y] = substr($this->screen[$this->y], 0, $this->x);
 
-                        array_splice($this->attrs[$this->y], $this->x + 1, $this->max_x - $this->x, array_fill($this->x, $this->max_x - $this->x - 1, $this->base_attr_cell));
+                        array_splice($this->attrs[$this->y], $this->x + 1, $this->max_x - $this->x, array_fill($this->x, $this->max_x - ($this->x - 1), $this->base_attr_cell));
                         break;
                     case "\x1B[2K": // Clear entire line
                         $this->screen[$this->y] = str_repeat(' ', $this->x);
@@ -305,6 +304,9 @@ class ANSI
                             case preg_match('#\x1B\[(\d+)D#', $this->ansi, $match): // Move cursor left n lines
                                 $this->old_x = $this->x;
                                 $this->x-= $match[1];
+                                if ($this->x < 0) {
+                                    $this->x = 0;
+                                }
                                 break;
                             case preg_match('#\x1B\[(\d+);(\d+)r#', $this->ansi, $match): // Set top and bottom lines of a window
                                 break;
@@ -313,19 +315,20 @@ class ANSI
                                 $mods = explode(';', $match[1]);
                                 foreach ($mods as $mod) {
                                     switch ($mod) {
-                                        case 0: // Turn off character attributes
+                                        case '':
+                                        case '0': // Turn off character attributes
                                             $attr_cell = clone $this->base_attr_cell;
                                             break;
-                                        case 1: // Turn bold mode on
+                                        case '1': // Turn bold mode on
                                             $attr_cell->bold = true;
                                             break;
-                                        case 4: // Turn underline mode on
+                                        case '4': // Turn underline mode on
                                             $attr_cell->underline = true;
                                             break;
-                                        case 5: // Turn blinking mode on
+                                        case '5': // Turn blinking mode on
                                             $attr_cell->blink = true;
                                             break;
-                                        case 7: // Turn reverse video on
+                                        case '7': // Turn reverse video on
                                             $attr_cell->reverse = !$attr_cell->reverse;
                                             $temp = $attr_cell->background;
                                             $attr_cell->background = $attr_cell->foreground;
@@ -338,23 +341,23 @@ class ANSI
                                             $back = &$attr_cell->{ $attr_cell->reverse ? 'foreground' : 'background' };
                                             switch ($mod) {
                                                 // @codingStandardsIgnoreStart
-                                                case 30: $front = 'black'; break;
-                                                case 31: $front = 'red'; break;
-                                                case 32: $front = 'green'; break;
-                                                case 33: $front = 'yellow'; break;
-                                                case 34: $front = 'blue'; break;
-                                                case 35: $front = 'magenta'; break;
-                                                case 36: $front = 'cyan'; break;
-                                                case 37: $front = 'white'; break;
+                                                case '30': $front = 'black'; break;
+                                                case '31': $front = 'red'; break;
+                                                case '32': $front = 'green'; break;
+                                                case '33': $front = 'yellow'; break;
+                                                case '34': $front = 'blue'; break;
+                                                case '35': $front = 'magenta'; break;
+                                                case '36': $front = 'cyan'; break;
+                                                case '37': $front = 'white'; break;
 
-                                                case 40: $back = 'black'; break;
-                                                case 41: $back = 'red'; break;
-                                                case 42: $back = 'green'; break;
-                                                case 43: $back = 'yellow'; break;
-                                                case 44: $back = 'blue'; break;
-                                                case 45: $back = 'magenta'; break;
-                                                case 46: $back = 'cyan'; break;
-                                                case 47: $back = 'white'; break;
+                                                case '40': $back = 'black'; break;
+                                                case '41': $back = 'red'; break;
+                                                case '42': $back = 'green'; break;
+                                                case '43': $back = 'yellow'; break;
+                                                case '44': $back = 'blue'; break;
+                                                case '45': $back = 'magenta'; break;
+                                                case '46': $back = 'cyan'; break;
+                                                case '47': $back = 'white'; break;
                                                 // @codingStandardsIgnoreEnd
 
                                                 default:
@@ -416,7 +419,7 @@ class ANSI
 
                     if ($this->x > $this->max_x) {
                         $this->x = 0;
-                        $this->y++;
+                        $this->_newLine();
                     } else {
                         $this->x++;
                     }
@@ -458,7 +461,7 @@ class ANSI
      * Returns the current coordinate without preformating
      *
      * @access private
-     * @return String
+     * @return string
      */
     function _processCoordinate($last_attr, $cur_attr, $char)
     {
@@ -515,7 +518,7 @@ class ANSI
      * Returns the current screen without preformating
      *
      * @access private
-     * @return String
+     * @return string
      */
     function _getScreen()
     {
@@ -539,7 +542,7 @@ class ANSI
      * Returns the current screen
      *
      * @access public
-     * @return String
+     * @return string
      */
     function getScreen()
     {
@@ -550,7 +553,7 @@ class ANSI
      * Returns the current screen and the x previous lines
      *
      * @access public
-     * @return String
+     * @return string
      */
     function getHistory()
     {

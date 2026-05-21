@@ -7,670 +7,681 @@ $currentPage = 'Home';
 @endphp
 @endsection
 
+@section('topbar-title')
+Dashboard
+@endsection
+
+@section('topbar-subtitle')
+Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
+@endsection
+
 @section('css')
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    /* Keep original chart height — do not stretch with fd-equal-row */
+    .fd-equal-row > .col-lg-8 > .row > .col-12:last-child > .fd-volume-chart.fd-card {
+        height: auto !important;
+    }
+    .fd-equal-row > .col-lg-8 > .row > .col-12:last-child .fd-volume-chart .fd-chart {
+        flex: none !important;
+        height: 290px !important;
+        max-height: 290px;
+        min-height: 0 !important;
+    }
+    .fd-volume-chart .fd-chart {
+        position: relative;
+    }
+    .fd-volume-chart .fd-chart canvas {
+        background-color: var(--fd-card, #ffffff);
+        display: block;
+    }
+    @media (max-width: 991.98px) {
+        .fd-equal-row > .col-lg-8 > .row > .col-12:last-child .fd-volume-chart .fd-chart {
+            height: 200px !important;
+            max-height: 200px;
+        }
+    }
+    @media (max-width: 575.98px) {
+        .fd-equal-row > .col-lg-8 > .row > .col-12:last-child .fd-volume-chart .fd-chart {
+            height: 180px !important;
+            max-height: 180px;
+        }
+    }
+    .fd-volume-chart .fd-chart.is-busy::before {
+        content: "";
+        position: absolute;
+        inset: 12px 18px 18px;
+        border-radius: 12px;
+        background: linear-gradient(
+            105deg,
+            transparent 0%,
+            rgba(26, 61, 43, 0.04) 45%,
+            rgba(26, 61, 43, 0.08) 50%,
+            rgba(26, 61, 43, 0.04) 55%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+        animation: fd-chart-process 1.1s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 1;
+    }
+    .fd-root.is-dark .fd-volume-chart .fd-chart.is-busy::before {
+        background: linear-gradient(
+            105deg,
+            transparent 0%,
+            rgba(212, 175, 55, 0.05) 45%,
+            rgba(212, 175, 55, 0.1) 50%,
+            rgba(212, 175, 55, 0.05) 55%,
+            transparent 100%
+        );
+        background-size: 200% 100%;
+    }
+    @keyframes fd-chart-process {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
 @endsection
 
 @section('page-content')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@php
+    $srv = session('service', 'all');
+    $recentTransactions = $totalTransactions->sortByDesc('created_at')->take(5);
 
+    $capturedTransactions = $totalTransactions->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);
+    $capturedPercentage = $totalTransactions->count() > 0 ? ($capturedTransactions->count() / $totalTransactions->count()) * 100 : 0;
+    $capturedCount = count($capturedTransactions);
 
-<div class="d-flex flex-column">
+    $awaitingTransactions = $totalTransactions->whereIn('payment_status', ['Pending', 'Processing', 'Attempting', 'Waiting', 'In-progress']);
+    $awaitingPercentage = $totalTransactions->count() > 0 ? ($awaitingTransactions->count() / $totalTransactions->count()) * 100 : 0;
+    $awaitingCount = count($awaitingTransactions);
 
-    <div class="card-scroller mt-3 pb-3 mx-2 mx-md-0">
+    $failedTransactions = $totalTransactions->whereIn('payment_status', ['Declined', 'Failed', 'Rejected', 'Cancelled', 'Canceled', 'Expired', 'Payment-error']);
+    $failedPercentage = $totalTransactions->count() > 0 ? ($failedTransactions->count() / $totalTransactions->count()) * 100 : 0;
+    $failedCount = count($failedTransactions);
 
-        <div class="row mb-2">
-            <form id="serviceForm" method="GET" action="{{ route('showHome') }}" class="d-flex align-items-end">
-                <label for="service" class="form-label">Select Service:</label>
-                <select name="service" id="service" class="form-select w-25 mx-2">
-                    <option value="all" {{ session('service','all') == 'all' ? 'selected' : '' }}>All</option>
-                    @php
-                        $company = Auth::user()->company()->first();
-                        $services = [
-                            'p12' => ['label' => '2D/3D',           'model' => \App\Models\PTwelvePaymentMethod::class],
-                            'p17' => ['label' => 'P-17 Dire',       'model' => \App\Models\Direpay::class],
-                            'p22' => ['label' => 'P-22 Uniqo',       'model' => \App\Models\UniqoPay::class],
-                            'p23' => ['label' => 'P-23 UPI',       'model' => \App\Models\UPIPayment::class],
-                        ];
-                    @endphp
-                    @foreach($services as $key => $service)
-                        @if($company && $service['model']::where('company_id', $company->id)->where('status', 1)->exists())
-                            <option value="{{ $key }}" {{ session('service') == $key ? 'selected' : '' }}>
-                                {{ $service['label'] }}
-                            </option>
-                        @endif
-                    @endforeach
-                </select>
-                <button type="submit" class="btn btn-outline-primary">GO</button>
-            </form>
-        </div>
+    $totalCount = $totalTransactions->count();
 
-        <!-- INNER: the track that lays cards horizontally -->
-        <div class="card-track mt-3">
-            @foreach ($totalTransactions->unique('currency') as $txn)
-            <div class="card-container-dashboard bg-blue-gradient" {{ $txn->currency != 'USD' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" width="25" height="25" viewBox="0 0 25 25" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M11.7188 23.4375V21.6592C7.83838 21.4355 5.48096 19.4365 5.46875 16.4062H8.98438C9.0708 17.6924 10.1494 18.6743 11.7188 18.8477V14.0625L10.4116 13.7207C7.43311 13.0283 5.83936 11.3091 5.83936 8.73633C5.83936 5.70361 8.01172 3.71484 11.7188 3.41797V1.5625H13.2812V3.41797C17.0601 3.72559 19.0918 5.74902 19.1406 8.59375H15.625C15.5879 7.41895 14.8521 6.4751 13.2812 6.34766V10.8398L14.7861 11.1953C17.9497 11.8877 19.5312 13.5254 19.5312 16.2109C19.5312 19.3525 17.3955 21.3809 13.2812 21.6465V23.4375H11.7188ZM11.7188 10.5469V6.34766C10.3716 6.42188 9.41064 7.24951 9.41064 8.42432C9.41064 9.51318 10.2109 10.2251 11.7188 10.5469ZM13.2812 14.3555V18.8477C15.144 18.7725 16.0342 17.9238 16.0342 16.6128C16.0342 15.4126 15.144 14.6045 13.2812 14.3555Z"
-                                fill="#0050B1" />
-                        </svg>
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="usdTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
+    $company = Auth::user()->company()->first();
+    $serviceTabs = ['all' => 'All'];
+    $services = [
+        'p12' => ['label' => 'P-12 [2D/3D]', 'model' => \App\Models\PTwelvePaymentMethod::class],
+        'p17' => ['label' => 'P-17 Dire', 'model' => \App\Models\Direpay::class],
+        'p22' => ['label' => 'P-22 Uniqo', 'model' => \App\Models\UniqoPay::class],
+        'p23' => ['label' => 'P-23 UPI', 'model' => \App\Models\UPIPayment::class],
+    ];
+    foreach ($services as $key => $service) {
+        if ($company && $service['model']::where('company_id', $company->id)->where('status', 1)->exists()) {
+            $serviceTabs[$key] = $service['label'];
+        }
+    }
 
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
+    $activeCurrencies = $totalTransactions->unique('currency')->pluck('currency')->map(fn ($c) => strtoupper($c))->values();
 
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text1">USD {{ round($usdTotal, 2) }}</div>
-                    <div class="amount-subtext">Total USD</div>
-                </div>
-            </div>
-            <div class="card-container-dashboard bg-cyan-gradient" {{ $txn->currency != 'GBP' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" width="23" height="23" viewBox="0 0 23 23" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12.9577 0C14.9739 1.27778e-05 16.99 0.423928 19.0062 1.27175L17.5639 4.83882C15.9406 4.17712 14.5344 3.84626 13.3454 3.84623C12.5389 3.84625 11.9186 4.07888 11.4843 4.54415C11.05 4.99911 10.8329 5.65567 10.8329 6.51381V9.50707H16.6488V12.9036H10.8329V15.1214C10.8329 16.8791 10.0523 18.1612 8.49105 18.9676H19.6266V23H3.37305V19.1537C4.43801 18.6988 5.16694 18.1767 5.55983 17.5873C5.96307 16.998 6.1647 16.1863 6.16471 15.1524V12.9036H3.40406V9.50705H6.16469V6.48284C6.16469 4.40463 6.75404 2.80719 7.93274 1.69052C9.12176 0.563506 10.7967 0 12.9577 0Z"
-                                fill="#07B3C3" />
-                        </svg>
+    $currencyKpis = [
+        'USD'  => ['total' => $usdTotal ?? 0,  'icon' => '$',  'slug' => 'usd'],
+        'GBP'  => ['total' => $gbpTotal ?? 0,  'icon' => '£',  'slug' => 'gbp'],
+        'USDT' => ['total' => $usdtTotal ?? 0, 'icon' => '₮', 'slug' => 'usdt'],
+        'ETH'  => ['total' => $ethTotal ?? 0,  'icon' => 'Ξ',  'slug' => 'eth'],
+        'EUR'  => ['total' => $eurTotal ?? 0,  'icon' => '€',  'slug' => 'eur'],
+        'CAD'  => ['total' => $cadTotal ?? 0,  'icon' => 'C$', 'slug' => 'cad'],
+        'INR'  => ['total' => $inrTotal ?? 0,  'icon' => '₹',  'slug' => 'inr'],
+    ];
 
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="gbpTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
+    $chartCurrencies = $totalTransactions
+        ->sortBy(fn ($txn) => [$txn->currency === 'INR' ? 0 : 1, $txn->currency])
+        ->unique('currency');
 
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
+    $defaultChartCurrency = strtoupper($chartCurrency ?? 'INR');
 
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text2">GBP {{ round($gbpTotal, 2) }}</div>
-                    <div class="amount-subtext">Total GBP</div>
-                </div>
-            </div>
-            <div class="card-container-dashboard bg-green-gradient" {{ $txn->currency != 'USDT' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" width="25" height="25" viewBox="0 0 25 25" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M11.7188 23.4375V21.6592C7.83838 21.4355 5.48096 19.4365 5.46875 16.4062H8.98438C9.0708 17.6924 10.1494 18.6743 11.7188 18.8477V14.0625L10.4116 13.7207C7.43311 13.0283 5.83936 11.3091 5.83936 8.73633C5.83936 5.70361 8.01172 3.71484 11.7188 3.41797V1.5625H13.2812V3.41797C17.0601 3.72559 19.0918 5.74902 19.1406 8.59375H15.625C15.5879 7.41895 14.8521 6.4751 13.2812 6.34766V10.8398L14.7861 11.1953C17.9497 11.8877 19.5312 13.5254 19.5312 16.2109C19.5312 19.3525 17.3955 21.3809 13.2812 21.6465V23.4375H11.7188ZM11.7188 10.5469V6.34766C10.3716 6.42188 9.41064 7.24951 9.41064 8.42432C9.41064 9.51318 10.2109 10.2251 11.7188 10.5469ZM13.2812 14.3555V18.8477C15.144 18.7725 16.0342 17.9238 16.0342 16.6128C16.0342 15.4126 15.144 14.6045 13.2812 14.3555Z"
-                                fill="#0050B1" />
-                        </svg>
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="usdtTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
+    $defaultChartSymbol = match ($defaultChartCurrency) {
+        'INR' => '₹',
+        'EUR' => '€',
+        'GBP' => '£',
+        default => '$',
+    };
 
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
+    // Same captured totals as KPI cards (approved/paid only), not all payment statuses
+    $defaultChartTotal = (float) ($currencyKpis[$defaultChartCurrency]['total'] ?? 0);
+@endphp
 
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text3">USDT {{ round($usdtTotal, 2) }}</div>
-                    <div class="amount-subtext">Total USDT</div>
-                </div>
-            </div>
-            <div class="card-container-dashboard bg-purple-gradient" {{ $txn->currency != 'ETH' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" width="25" height="25" viewBox="0 0 25 25" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M11.7188 23.4375V21.6592C7.83838 21.4355 5.48096 19.4365 5.46875 16.4062H8.98438C9.0708 17.6924 10.1494 18.6743 11.7188 18.8477V14.0625L10.4116 13.7207C7.43311 13.0283 5.83936 11.3091 5.83936 8.73633C5.83936 5.70361 8.01172 3.71484 11.7188 3.41797V1.5625H13.2812V3.41797C17.0601 3.72559 19.0918 5.74902 19.1406 8.59375H15.625C15.5879 7.41895 14.8521 6.4751 13.2812 6.34766V10.8398L14.7861 11.1953C17.9497 11.8877 19.5312 13.5254 19.5312 16.2109C19.5312 19.3525 17.3955 21.3809 13.2812 21.6465V23.4375H11.7188ZM11.7188 10.5469V6.34766C10.3716 6.42188 9.41064 7.24951 9.41064 8.42432C9.41064 9.51318 10.2109 10.2251 11.7188 10.5469ZM13.2812 14.3555V18.8477C15.144 18.7725 16.0342 17.9238 16.0342 16.6128C16.0342 15.4126 15.144 14.6045 13.2812 14.3555Z"
-                                fill="#0050B1" />
-                        </svg>
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="ethTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
+<div id="fdShell">
 
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
-
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text4">ETH {{ round($ethTotal, 2) }}</div>
-                    <div class="amount-subtext">Total ETHEREUM</div>
-                </div>
-            </div>
-
-            <div class="card-container-dashboard bg-blue-gradient" {{ $txn->currency != 'EUR' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" fill="#0050B1" height="25" width="25" version="1.1" id="Capa_1"
-                            xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                            viewBox="0 0 310.75 310.75" xml:space="preserve">
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <path
-                                    d="M183.815,265.726c-32.444,0-60.868-21.837-76.306-54.325h102.101v-45.023H95.643c-0.284-3.642-0.437-7.29-0.437-11.016 c0-3.691,0.152-7.384,0.437-10.977h113.969V99.353H107.51c15.438-32.485,43.861-54.315,76.306-54.315 c31.01,0,60.21,20.759,76.2,54.152l40.626-19.418C277.091,30.554,232.329,0,183.815,0c-36.47,0-70.51,16.665-95.851,46.966 C75.219,62.209,65.481,79.995,59.079,99.353H10.108v45.031h40.39c-0.217,3.617-0.329,7.311-0.329,10.977 c0,3.704,0.112,7.351,0.329,11.016h-40.39V211.4h48.971c6.402,19.356,16.14,37.122,28.886,52.351 c25.341,30.303,59.381,46.999,95.851,46.999c48.515,0,93.275-30.55,116.826-79.767l-40.626-19.454 C244.025,244.965,214.825,265.726,183.815,265.726z">
-                                </path>
-                            </g>
-                        </svg>
-
-
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="eurTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
-
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
-
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text5">EUR {{ number_format($eurTotal, 2, '.', '')}}
-                    </div>
-                    <div class="amount-subtext">Total EUR</div>
-                </div>
-            </div>
-
-            <div class="card-container-dashboard bg-mint-gradient" {{ $txn->currency != 'CAD' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" fill="#0050B1" width="25" height="25" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <path d="M115 40c-45 0-85 40-85 120s40 120 85 120c25 0 44-12 58-32l-31-18c-7 10-17 17-27 17-30 0-55-33-55-87s25-87 55-87c10 0 20 6 27 17l31-18c-14-20-33-32-58-32zm125 40h-30v40c-35 5-60 25-60 55 0 32 25 48 60 56v49h30v-47c38-4 65-27 65-58 0-35-27-51-65-60V80zm0 96c20 6 35 14 35 32s-15 28-35 32v-64z"/>
-                            </g>
-
-                        </svg>
-
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="cadTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
-
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="white"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
-
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text6">CAD {{ number_format($cadTotal, 2, '.', '')}}
-                    </div>
-                    <div class="amount-subtext">Total CAD</div>
-                </div>
-            </div>
-
-            <div class="card-container-dashboard bg-brown-gradient" {{ $txn->currency != 'INR' ? 'style=display:none;' : '' }}>
-                <div class="d-flex justify-content-between card-top">
-                    <div class="curr-sign-container">
-                        <svg class="curr-sign" width="25" height="25" viewBox="0 0 24 24"
-                             xmlns="http://www.w3.org/2000/svg">
-                            <text x="4" y="18" font-size="18" font-family="Arial, sans-serif" fill="#0050B1">₹</text>
-                        </svg>
-                    </div>
-                    <div class="time-selection">
-                        <form action="" class="ts-form form-select form-select-sm">
-                            <select class="ts-select" id="inrTotal-select">
-                                <option value="total" selected>Total</option>
-                                <option value="thisMonth">This month</option>
-                                <option value="lastMonth">Last month</option>
-                                <option value="lastFewMonths">Last 3 months</option>
-                            </select>
-
-                            <svg width="14" height="14" viewBox="0 0 12 12" fill="white"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M6.53044 8.02994C6.38981 8.1704 6.19919 8.24929 6.00044 8.24929C5.80169 8.24929 5.61106 8.1704 5.47044 8.02994L2.64144 5.20194C2.50081 5.06125 2.42183 4.87045 2.42188 4.67152C2.42192 4.47259 2.50099 4.28183 2.64169 4.14119C2.78239 4.00056 2.97319 3.92158 3.17212 3.92163C3.37104 3.92168 3.56181 4.00075 3.70244 4.14144L6.00044 6.43944L8.29844 4.14144C8.43983 4.00476 8.62924 3.92907 8.82589 3.93069C9.02254 3.9323 9.21069 4.01109 9.34981 4.15008C9.48893 4.28907 9.5679 4.47715 9.5697 4.67379C9.5715 4.87044 9.49599 5.05993 9.35944 5.20144L6.53094 8.03045L6.53044 8.02994Z"
-                                    fill="white" />
-                            </svg>
-                        </form>
-                    </div>
-                </div>
-                <div class="px-4 pt-1">
-                    <div class="amount-text" id="amount-text7">INR {{ number_format($inrTotal, 2, '.', '')}}
-                    </div>
-                    <div class="amount-subtext">Total INR</div>
-                </div>
-            </div>
+    <div class="fd-toolbar mb-3">
+        <span class="fd-label">Service</span>
+        <span class="fd-divider"></span>
+        <div class="fd-tabs">
+            @foreach ($serviceTabs as $key => $label)
+                <a class="fd-tab {{ $srv === $key ? 'is-active' : '' }}" href="{{ route('showHome', ['service' => $key]) }}">{{ $label }}</a>
             @endforeach
         </div>
     </div>
-    <div class="row mt-4  mx-2 mx-md-4">
 
-        <div class="col-xxl-6 pb-4 pb-md-5 ps-md-2 pb-xxl-0 ps-md-0 pe-xxl-4 pe-xl-0 pe-md-2 p-0">
-            <div class=" chart px-2 px-md-5">
-                <div class="d-flex justify-content-end align-items-center mb-3">
-                    <select id="currencySelect" class="form-select chart-select w-auto">
-                        @php
-                            $currencies = $totalTransactions
-                                ->sortBy(fn($txn) => [$txn->currency === 'INR' ? 0 : 1, $txn->currency])
-                                ->unique('currency');
-                        @endphp
-                        
-                        @foreach ($currencies as $txn)
-                            <option value="{{ $txn->currency }}">{{ $txn->currency }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="chart-container">
-                    <canvas id="amountChart" class="chart-body"></canvas>
-                </div>
+    <div class="row g-3 fd-equal-row">
+        <div class="col-12 col-lg-8">
+            <div class="row g-3">
+                @foreach ($currencyKpis as $code => $kpi)
+                    @if ($activeCurrencies->contains($code))
+                        <div class="col-12 {{ $activeCurrencies->count() > 1 ? 'col-md-6' : '' }}">
+                            <div class="fd-kpi">
+                                <div class="fd-kpi-inner">
+                                    <div class="fd-kpi-top">
+                                        <div class="fd-kpi-icon">{{ $kpi['icon'] }}</div>
+                                        <span class="fd-kpi-filter-wrap">
+                                            <select class="fd-kpi-filter" id="kpiRange-{{ $kpi['slug'] }}" aria-label="{{ $code }} time filter" data-currency="{{ $code }}">
+                                                <option value="total" selected>Total</option>
+                                                <option value="thisMonth">This month</option>
+                                                <option value="lastMonth">Last month</option>
+                                                <option value="lastFewMonths">Last 3 months</option>
+                                            </select>
+                                        </span>
+                                    </div>
+                                    <div class="fd-kpi-amount">{{ $code }} <span id="kpiAmount-{{ $kpi['slug'] }}">{{ number_format((float) $kpi['total'], 2) }}</span></div>
+                                    <div class="fd-kpi-sub"><small id="kpiSub-{{ $kpi['slug'] }}">Total {{ $code }}</small></div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endforeach
 
-            </div>
-        </div>
-        <!-- Table -->
-        <div class="col-xxl-6 p-0 pb-2 pb-md-0 ps-xxl-4 pe-xl-0 pe-xxl-0">
-            <div class="dashboard-table h-100 table-responsive">
-                <div class="d-flex justify-content-between align-items-center px-3 px-md-5 pt-4 mb-2">
-                    <span class="dashboard-table-top-left">
-                        Transactions
-                    </span>
-                    <a href="{{ route('showTransactions') }}" class="dashboard-table-top-right">
-                        View all
-                    </a>
-                </div>
-                <table class="text-center px-1 px-md-5 table align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="cid">Checkout ID</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Amount</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                        $recentTransactions = $totalTransactions->sortByDesc('created_at')->take(5);
-                        @endphp
-                        @foreach ($recentTransactions as $trans)
-                        <tr>
-                            <td class="text-truncate text-md-nowrap cid-td" scope="row">{{ $trans->checkout_id }}</td>
-                            <td class="text-nowrap">
-                                @php
-                                $status = strtolower($trans->payment_status);
-                                if (in_array($status, ['approved', 'succeeded', 'completed', 'done'])) {
-                                $color = 'bg-successColor'; // green
-                                } elseif (in_array($status, ['declined', 'failed', 'rejected', 'cancelled', 'canceled', 'payment-error'])) {
-                                $color = 'bg-dangerColor'; // red
-                                } elseif (in_array($status, ['pending', 'in-progress'])) {
-                                $color = 'bg-warningColor'; // orange
-                                } else {
-                                $color = 'bg-secondary'; // default gray
-                                }
-                                @endphp
-
-                                <span class="dash-status text-white {{ $color }}">{{ ucfirst($trans->payment_status) }}</span>
-                            </td>
-                            <td class="text-nowrap">{{ \Carbon\Carbon::parse($trans->created_at)->format('d/m/Y') }}</td>
-                            <td class="text-nowrap">{{ $trans->currency }} {{ number_format($trans->settled_amount ?? $trans->amount, 2) }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Cards -->
-
-    <div class="d-flex flex-column mt-3">
-        <div class="card-row1 d-flex flex-column flex-xl-row">
-            <div class="r1c1 flex-fill px-2 px-md-5">
-                <h5>
-                    CAPTURED
-                </h5>
-                @php
-                $capturedTransactions = $totalTransactions->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);
-                $capturedPercentage = $totalTransactions->count() > 0 ? ($capturedTransactions->count() / $totalTransactions->count()) * 100 : 0;
-                $capturedCount = count($capturedTransactions);
-                @endphp
-                <div class="progress-bar d-flex flex-column gap-1 align-items-start">
-                    <span>{{ $capturedCount }}</span>
-                    <div class="bar">
-                        <div class="progress"
-                            style="width: {{ $capturedPercentage }}%; height: 100%; background-color:white">
+                <div class="col-12">
+                    <div class="fd-card fd-volume-chart" id="volumeChartCard">
+                        <div class="fd-card-head">
+                            <div>
+                                <div class="fd-card-title">Transaction Volume</div>
+                                <div class="fd-card-value" id="chartTotalValue">
+                                    {{ $defaultChartSymbol . number_format($defaultChartTotal, 2) }}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <select class="fd-select" id="currencySelect" aria-label="Chart currency">
+                                    @foreach ($chartCurrencies as $txn)
+                                        @php $optCur = strtoupper($txn->currency ?? 'USD'); @endphp
+                                        <option value="{{ $optCur }}" {{ $optCur === $defaultChartCurrency ? 'selected' : '' }}>{{ $optCur }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="fd-chart" id="amountChartWrap">
+                            <canvas id="amountChart"></canvas>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end" style="width:100%;">
-                        <span>
-                            {{ number_format($capturedPercentage, 2) }}%
-                        </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4 fd-equal-col">
+            <div class="fd-card h-100 fd-tx-card">
+                <div class="fd-tx-head">
+                    <div class="fd-tx-head-left d-flex align-items-center gap-2">
+                        <h3>Transactions</h3>
+                        <span class="fd-tx-count">{{ $totalCount }}</span>
+                    </div>
+                    <a href="{{ route('showTransactions') }}" class="fd-link">View all ↗</a>
+                </div>
+
+                <div class="fd-search">
+                    <input type="search" id="txSearch" placeholder="Search by checkout ID…" aria-label="Search transactions">
+                </div>
+
+                <div id="txList">
+                    @foreach ($recentTransactions as $trans)
+                        @php
+                            $s = strtolower($trans->payment_status);
+                            $cls = 'is-pending';
+                            if (in_array($s, ['approved', 'succeeded', 'completed', 'done', 'captured', 'paid', 'success', 'complete'])) {
+                                $cls = '';
+                            }
+                            if (in_array($s, ['declined', 'failed', 'rejected', 'cancelled', 'canceled', 'payment-error', 'expired'])) {
+                                $cls = 'is-failed';
+                            }
+                            $amount = $trans->settled_amount ?? $trans->amount;
+                            $cur = strtoupper($trans->currency ?? 'USD');
+                            $sym = match ($cur) {
+                                'INR' => '₹',
+                                'EUR' => '€',
+                                'GBP' => '£',
+                                'USDT' => '₮',
+                                'ETH' => 'Ξ',
+                                'CAD' => 'C$',
+                                default => '$',
+                            };
+                            $curClass = match ($cur) {
+                                'INR' => 'fd-cur-inr',
+                                'USD' => 'fd-cur-usd',
+                                default => 'fd-cur-other',
+                            };
+                        @endphp
+                        <div class="fd-row" data-id="{{ $trans->checkout_id }}">
+                            <div class="fd-cur-badge {{ $curClass }}">{{ $sym }}</div>
+                            <div class="fd-row-mid">
+                                <div class="fd-row-id">{{ $trans->checkout_id }}</div>
+                                <div class="fd-row-date">{{ \Carbon\Carbon::parse($trans->created_at)->format('d/m/Y') }}</div>
+                            </div>
+                            <div class="fd-row-right">
+                                <div class="fd-row-amt {{ $cls }}">{{ $sym }}{{ number_format((float) $amount, 2) }}</div>
+                                <div class="fd-status {{ $cls }}">
+                                    <span class="dot"></span>
+                                    <span class="lbl">{{ ucfirst($trans->payment_status) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="row g-3">
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="fd-metric green">
+                        <div class="fd-metric-head">
+                            <span class="fd-metric-label">Captured</span>
+                            <div class="fd-metric-icon">
+                                <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L11 3.5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="val">{{ $capturedCount }}</div>
+                        <div class="fd-meter">
+                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:{{ min($capturedPercentage, 100) }}%"></div></div>
+                            <span class="fd-foot">{{ number_format($capturedPercentage, 2) }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="fd-metric amber">
+                        <div class="fd-metric-head">
+                            <span class="fd-metric-label">Awaiting</span>
+                            <div class="fd-metric-icon">
+                                <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="4" stroke="#f59e0b" stroke-width="1.5"/><path d="M6.5 4.5V6.5L7.5 7.5" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="val">{{ $awaitingCount }}</div>
+                        <div class="fd-meter">
+                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:{{ min($awaitingPercentage, 100) }}%"></div></div>
+                            <span class="fd-foot">{{ number_format($awaitingPercentage, 2) }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="fd-metric red">
+                        <div class="fd-metric-head">
+                            <span class="fd-metric-label">Failed</span>
+                            <div class="fd-metric-icon">
+                                <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4L9 9M9 4L4 9" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
+                            </div>
+                        </div>
+                        <div class="val">{{ $failedCount }}</div>
+                        <div class="fd-meter">
+                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:{{ min($failedPercentage, 100) }}%"></div></div>
+                            <span class="fd-foot">{{ number_format($failedPercentage, 2) }}%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3">
+                    <div class="fd-metric violet">
+                        <div class="fd-metric-head">
+                            <span class="fd-metric-label">Total</span>
+                            <div class="fd-metric-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                    <path d="M11.9167 6.49998H10.5734C10.3366 6.49947 10.1063 6.57652 9.91748 6.71934C9.72869 6.86215 9.59187 7.06288 9.52796 7.29081L8.25504 11.8191C8.24684 11.8473 8.22973 11.872 8.20629 11.8896C8.18285 11.9071 8.15434 11.9166 8.12504 11.9166C8.09574 11.9166 8.06723 11.9071 8.04379 11.8896C8.02035 11.872 8.00325 11.8473 7.99504 11.8191L5.00504 1.18081C4.99684 1.15268 4.97973 1.12798 4.95629 1.1104C4.93285 1.09282 4.90434 1.08331 4.87504 1.08331C4.84574 1.08331 4.81723 1.09282 4.79379 1.1104C4.77035 1.12798 4.75324 1.15268 4.74504 1.18081L3.47212 5.70915C3.40846 5.93619 3.27246 6.13626 3.08476 6.27899C2.89706 6.42171 2.66792 6.49931 2.43212 6.49998H1.08337" stroke="#818CF8" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="val">{{ $totalCount }}</div>
+                        <div class="fd-meter">
+                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:100%"></div></div>
+                            <span class="fd-foot">100.00%</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="r1c2 flex-fill px-2 px-md-5">
-                <h5>
-                    AWAITING
-                </h5>
-                @php
-                $awaitingTransactions = $totalTransactions->whereIn('payment_status', ['Pending', 'Processing', 'Attempting', 'Waiting']);
-                $awaitingPercentage = $totalTransactions->count() > 0 ? ($awaitingTransactions->count() / $totalTransactions->count()) * 100 : 0;
-                $awaitingCount = count($awaitingTransactions);
-                @endphp
-                <div class="progress-bar d-flex flex-column gap-1 align-items-start">
-                    <span>{{ $awaitingCount }}</span>
-                    <div class="bar" style="width:100%;">
-                        <div class="progress" style="width:{{ $awaitingPercentage }}%; height: 100%; background-color:white"></div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-end" style="width:100%;">
-                    <span>
-                        {{ number_format($awaitingPercentage, 2) }}%
-                    </span>
-                </div>
-            </div>
         </div>
-
-
     </div>
-    <div class="card-row2 d-flex flex-column flex-xl-row mb-5">
-        <div class="r2c1 flex-fill px-2 px-md-5">
-            <h5>
-                FAILED
-            </h5>
-            @php
-            $failedTransactions = $totalTransactions->whereIn('payment_status', ['Declined', 'Failed', 'Rejected', 'Cancelled', 'Canceled', 'Expired']);
-            $failedPercentage = $totalTransactions->count() > 0 ? ($failedTransactions->count() / $totalTransactions->count()) * 100 : 0;
-            $failedCount = count($failedTransactions);
-            @endphp
-            <div class="progress-bar d-flex flex-column gap-1 align-items-start">
-                <span>{{ $failedCount }}</span>
-                <div class="bar">
-                    <div class="progress" style="width:{{ $failedPercentage }}%; height: 100%; background-color:white"></div>
-
-                </div>
-                <div class="d-flex justify-content-end" style="width:100%;">
-                    <span>
-                        {{ number_format($failedPercentage, 2) }}%
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="r2c2 flex-fill px-2 px-md-5">
-            <h5>
-                TOTAL
-            </h5>
-            @php
-            $totalCount = $totalTransactions->count() > 0 ? $totalTransactions->count() : 0;
-            $totalPercentage = $totalTransactions->count() > 0 ? 100 : 0;
-            @endphp
-            <div class="progress-bar d-flex flex-column gap-1 align-items-start">
-                <span>{{ $totalCount }}</span>
-                <div class="bar">
-                    <div class="progress" style="width:{{ $totalPercentage }}%; height: 100%; background-color:white"></div>
-
-                </div>
-                <div class="d-flex justify-content-end" style="width:100%;">
-                    <span>
-                        {{ number_format($totalPercentage, 2) }}%
-                    </span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
 </div>
-</div>
-
-
-
-
-
 
 @endsection
 
 @section('scripts')
-{{-- chart.js script --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const months = @json($months);
-        const amounts = @json($amounts);
-        // console.log(months,amounts);
+(function() {
+    const months = @json($months);
+    const amounts = @json($amounts);
+    const canvas = document.getElementById('amountChart');
+    if (!canvas || typeof Chart === 'undefined') return;
 
-        // Get context
-        const ctx = document.getElementById('amountChart').getContext('2d');
+    const ctx = canvas.getContext('2d');
+    const html = document.documentElement;
+    const chartBox = document.getElementById('amountChartWrap') || canvas.closest('.fd-chart');
+    let chartFetchAbort = null;
+    let amountChart = null;
+    let chartAnimating = false;
 
-        // Initialize chart
-        const amountChart = new Chart(ctx, {
-            type: 'bar',
+    const DRAW_MS = 1200;
+    const FETCH_DRAW_MS = 650;
+
+    if (typeof Chart.register === 'function') {
+        Chart.register({
+            id: 'fdLineGradient',
+            beforeDatasetDraw: function(chart, args) {
+                if (!args.meta || args.meta.type !== 'line') return;
+                const ds = chart.data.datasets[0];
+                if (!ds) return;
+                ds.backgroundColor = makeGradient(isDark(), chart);
+            },
+        });
+    }
+
+    function isDark() {
+        return html.classList.contains('is-dark');
+    }
+
+    function chartTheme(dark) {
+        return dark
+            ? { line: '#d4af37', fillTop: 'rgba(212, 175, 55, 0.18)', fillBottom: 'rgba(212, 175, 55, 0)' }
+            : { line: '#1a3d2b', fillTop: 'rgba(26, 61, 43, 0.18)', fillBottom: 'rgba(26, 61, 43, 0)' };
+    }
+
+    function scaleColors(dark) {
+        return {
+            tick: dark ? '#5a6480' : '#9ba4be',
+            grid: dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(10, 15, 30, 0.06)',
+        };
+    }
+
+    function makeGradient(dark, chart) {
+        const area = chart && chart.chartArea;
+        const top = area && area.top > 0 ? area.top : 0;
+        const bottom = area && area.bottom > top ? area.bottom : (chartBox ? chartBox.clientHeight : 290);
+        const g = ctx.createLinearGradient(0, top, 0, bottom);
+        const t = chartTheme(dark);
+        g.addColorStop(0, t.fillTop);
+        g.addColorStop(1, t.fillBottom);
+        return g;
+    }
+
+    function yFromBaseline(ctx) {
+        if (ctx.type === 'data' && amountChart && amountChart.scales.y) {
+            return amountChart.scales.y.getPixelForValue(0);
+        }
+    }
+
+    function setDrawAnimation(ms) {
+        if (!amountChart) return;
+        amountChart.options.animation = { duration: ms, easing: 'easeInOutCubic' };
+        amountChart.options.animations = {
+            tension: { duration: ms, easing: 'easeInOutCubic' },
+            x: { duration: Math.round(ms * 0.28), easing: 'easeInOutCubic' },
+            y: { duration: ms, easing: 'easeInOutCubic', from: yFromBaseline },
+        };
+    }
+
+    function applyChartTheme(dark, mode) {
+        if (!amountChart || chartAnimating) return;
+        const t = chartTheme(dark);
+        const colors = scaleColors(dark);
+        amountChart.data.datasets[0].borderColor = t.line;
+        amountChart.options.scales.x.ticks.color = colors.tick;
+        amountChart.options.scales.y.ticks.color = colors.tick;
+        amountChart.options.scales.y.grid.color = colors.grid;
+        amountChart.update(mode || 'none');
+    }
+
+    /** Paint empty axes/grid on canvas (no line animation). */
+    function renderCanvasShell(labels) {
+        if (!amountChart) return;
+        const zeros = (labels || months).map(function() { return 0; });
+        amountChart.data.labels = labels || months;
+        amountChart.data.datasets[0].data = zeros;
+        amountChart.options.animation = false;
+        amountChart.options.animations = false;
+        amountChart.update('none');
+        if (chartBox) {
+            chartBox.classList.add('is-canvas-ready');
+            chartBox.classList.remove('is-busy');
+        }
+    }
+
+    /** Animate line + fill from baseline once data is ready. */
+    function drawChartData(labels, series, ms) {
+        if (!amountChart) return;
+        chartAnimating = true;
+        if (chartBox) chartBox.classList.remove('is-busy');
+
+        setDrawAnimation(ms || DRAW_MS);
+        amountChart.data.labels = labels;
+        amountChart.data.datasets[0].data = series;
+
+        var prevOnComplete = amountChart.options.animation.onComplete;
+        amountChart.options.animation.onComplete = function() {
+            chartAnimating = false;
+            amountChart.options.animation = false;
+            amountChart.options.animations = false;
+            amountChart.options.animation.onComplete = prevOnComplete;
+        };
+
+        amountChart.update();
+    }
+
+    function buildChart() {
+        const dark = isDark();
+        const colors = scaleColors(dark);
+        const t = chartTheme(dark);
+        const zeroSeries = amounts.map(function() { return 0; });
+
+        amountChart = window._amountChart = new Chart(ctx, {
+            type: 'line',
             data: {
                 labels: months,
                 datasets: [{
-                    label: "Amount",
-                    data: amounts,
-                    borderWidth: 1,
-                    backgroundColor: '#0050B1',
-                    borderRadius: {
-                        topLeft: 8,
-                        topRight: 8
-                    }
+                    data: zeroSeries,
+                    borderColor: t.line,
+                    backgroundColor: 'transparent',
+                    fill: true,
+                    tension: 0.42,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHitRadius: 12
                 }]
             },
             options: {
-
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    x: {
-
-                        grid: {
-                            display: false // ❌ hide vertical grid lines
-
-                        },
-                        categoryPercentage: 0.3, // more space between categories
-                        barPercentage: 0.5, // thinner bars
-                        ticks: {
-                            padding: 15,
-                            autoSkip: false,
-                            maxRotation: 45,
-                            minRotation: 45,
-                        },
-
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            drawBorder: false,
-                            color: "rgba(0,0,0,0.3)", // horizontal grid line color
-                            lineWidth: 0.5,
-                            borderDashOffset: 0 // alignment
+                animation: false,
+                animations: false,
+                transitions: {
+                    active: { animation: { duration: FETCH_DRAW_MS, easing: 'easeInOutCubic' } },
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 15, 30, 0.92)',
+                        displayColors: false,
+                        padding: 12,
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: (c) => {
+                                const v = c.parsed?.y ?? 0;
+                                return new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+                            }
                         }
                     }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: colors.tick, font: { size: 11, weight: '600' } }, border: { display: false } },
+                    y: { beginAtZero: true, grid: { color: colors.grid }, ticks: { color: colors.tick, font: { size: 11, weight: '600' } }, border: { display: false } }
                 }
             }
         });
 
+        renderCanvasShell(months);
 
-        // Currency change event → live fetch
-        document.getElementById('currencySelect').addEventListener('change', function() {
-            updateChart(this.value, amountChart);
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                drawChartData(months, amounts.slice(), DRAW_MS);
+            });
         });
-    });
 
-    // Fetch + update function
-    function updateChart(currency, chart) {
-        fetch(`/user/home/updated-chart-data/${currency}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('response back', data);
+        if (chartBox && typeof ResizeObserver !== 'undefined') {
+            let resizeTimer = null;
+            new ResizeObserver(function() {
+                if (!amountChart || chartAnimating) return;
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    amountChart.resize();
+                    amountChart.update('none');
+                }, 50);
+            }).observe(chartBox);
+        }
+    }
 
-                chart.data.labels = data.months;
-                chart.data.datasets[0].data = data.amounts;
-                chart.data.datasets[0].label = `Amount (${currency})`;
-                chart.update();
+    const allTransactions = @json($totalTransactionsJS);
+
+    function currencyTotal(currency) {
+        let sum = 0;
+        for (const t of (allTransactions || [])) {
+            if (!t || (t.currency || '').toUpperCase() !== currency) continue;
+            const amt = parseFloat(t.amount);
+            if (Number.isFinite(amt)) sum += amt;
+        }
+        return sum;
+    }
+
+    function currencySymbol(currency) {
+        const map = { USD: '$', INR: '₹', EUR: '€', GBP: '£', USDT: '₮', ETH: 'Ξ', CAD: 'C$' };
+        return map[currency] || (currency + ' ');
+    }
+
+    function syncChartHeader(currency) {
+        if (!chartTotalValue) return;
+        const total = currencyTotal(currency);
+        const sym = currencySymbol(currency);
+        chartTotalValue.textContent = total > 0
+            ? sym + new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)
+            : sym + '0.00';
+    }
+
+    const currencySelect = document.getElementById('currencySelect');
+    const chartTotalValue = document.getElementById('chartTotalValue');
+
+    function onCurrencyChange() {
+        const currency = this.value;
+        syncChartHeader(currency);
+
+        if (chartFetchAbort) chartFetchAbort.abort();
+        chartFetchAbort = new AbortController();
+
+        if (chartBox) chartBox.classList.add('is-busy');
+
+        fetch(`/user/home/updated-chart-data/${encodeURIComponent(currency)}`, { signal: chartFetchAbort.signal })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (!data || !amountChart) return;
+                drawChartData(data.months || [], data.amounts || [], FETCH_DRAW_MS);
             })
-            .catch(error => {
-                console.error('Error fetching updated chart data:', error);
+            .catch(function(err) {
+                if (err && err.name === 'AbortError') return;
+                if (chartBox) chartBox.classList.remove('is-busy');
             });
     }
+
+    function start() {
+        buildChart();
+        window._updateAmountChartTheme = function(dark) { applyChartTheme(dark, 'none'); };
+        if (currencySelect) {
+            currencySelect.addEventListener('change', onCurrencyChange);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
 </script>
 
-<!-- script for cards -->
 <script>
-    const transactions = @json($totalTransactionsJS);
+(function() {
+    const kpiTransactions = @json($totalTransactionsJS);
 
-    const currencyMap = {
-        'usdTotal-select': 'USD',
-        'gbpTotal-select': 'GBP',
-        'usdtTotal-select': 'USDT',
-        'ethTotal-select': 'ETH',
-        'eurTotal-select': 'EUR',
-        'cadTotal-select': 'CAD',
-        'inrTotal-select': 'INR',
-    };
+    document.querySelectorAll('.fd-kpi-filter[data-currency]').forEach(function(select) {
+        const currency = select.getAttribute('data-currency');
+        const slug = select.id.replace('kpiRange-', '');
+        const amountEl = document.getElementById('kpiAmount-' + slug);
+        const subEl = document.getElementById('kpiSub-' + slug);
+        if (!amountEl) return;
 
-    const amountMap = {
-        'usdTotal-select': 'amount-text1',
-        'gbpTotal-select': 'amount-text2',
-        'usdtTotal-select': 'amount-text3',
-        'ethTotal-select': 'amount-text4',
-        'eurTotal-select': 'amount-text5',
-        'cadTotal-select': 'amount-text6',
-        'inrTotal-select': 'amount-text7',
-    };
+        function filterByDate(range) {
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
 
-    document.addEventListener("DOMContentLoaded", function() {
+            return kpiTransactions.filter(function(t) {
+                if ((t.currency || '').toUpperCase() !== currency) return false;
 
-        Object.keys(currencyMap).forEach(selectId => {
+                const date = new Date(t.created_at);
+                const month = date.getMonth();
+                const year = date.getFullYear();
 
-            const currency = currencyMap[selectId];
-            const amountDiv = document.getElementById(amountMap[selectId]);
-            const select = document.getElementById(selectId);
-            const subtextDiv = amountDiv.nextElementSibling;
+                if (range === 'total') return true;
+                if (range === 'thisMonth') return month === currentMonth && year === currentYear;
+                if (range === 'lastMonth') {
+                    const lm = currentMonth - 1;
+                    const lmY = lm < 0 ? currentYear - 1 : currentYear;
+                    const lmM = (lm + 12) % 12;
+                    return month === lmM && year === lmY;
+                }
+                if (range === 'lastFewMonths') {
+                    const cutoff = new Date();
+                    cutoff.setMonth(cutoff.getMonth() - 3);
+                    return date >= cutoff;
+                }
+                return true;
+            });
+        }
 
-            function filterByDate(range) {
-                const now = new Date();
-                const currentMonth = now.getMonth();
-                const currentYear = now.getFullYear();
+        function updateAmount() {
+            const range = select.value;
+            const labels = {
+                total: 'Total ' + currency,
+                thisMonth: 'This month · ' + currency,
+                lastMonth: 'Last month · ' + currency,
+                lastFewMonths: 'Last 3 months · ' + currency,
+            };
+            if (subEl) subEl.innerText = labels[range] || ('Total ' + currency);
 
-                return transactions.filter(t => {
-                    if (t.currency !== currency) return false;
+            const filtered = filterByDate(range);
+            const sum = filtered.reduce(function(acc, t) {
+                return acc + parseFloat(t.amount || 0);
+            }, 0);
 
-                    const date = new Date(t.created_at);
-                    const month = date.getMonth();
-                    const year = date.getFullYear();
+            amountEl.innerText = new Intl.NumberFormat(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(sum);
+        }
 
-                    if (range === "total") {
-                        return true;
-                    }
-
-                    if (range === "thisMonth") {
-                        return month === currentMonth && year === currentYear;
-                    }
-
-                    if (range === "lastMonth") {
-                        const lastMonth = currentMonth - 1;
-                        const lastMonthYear = lastMonth < 0 ? currentYear - 1 : currentYear;
-                        const normalizedLastMonth = (lastMonth + 12) % 12;
-
-                        return month === normalizedLastMonth && year === lastMonthYear;
-                    }
-
-                    if (range === "lastFewMonths") {
-                        const cutoff = new Date();
-                        cutoff.setMonth(cutoff.getMonth() - 3);
-                        return date >= cutoff;
-                    }
-
-                    return true;
-                });
-            }
-
-            function updateAmount() {
-                const range = select.value;
-
-                const subtextLabels = {
-                    'total': `Total ${currency}`,
-                    'thisMonth': 'This month',
-                    'lastMonth': 'Last month',
-                    'lastFewMonths': 'Last 3 months'
-                };
-
-                subtextDiv.innerText = subtextLabels[range];
-
-                const filtered = filterByDate(range);
-
-                const sum = filtered.reduce((acc, t) => acc + parseFloat(t.amount), 0);
-
-                amountDiv.innerText = `${currency} ${sum.toFixed(2)}`;
-            }
-
-            select.addEventListener("change", updateAmount);
-
-            updateAmount();
-        });
+        select.addEventListener('change', updateAmount);
+        updateAmount();
     });
+
+    const input = document.getElementById('txSearch');
+    const list = document.getElementById('txList');
+    if (input && list) {
+        input.addEventListener('input', () => {
+            const q = input.value.trim().toLowerCase();
+            list.querySelectorAll('.fd-row').forEach(row => {
+                const id = (row.getAttribute('data-id') || '').toLowerCase();
+                row.style.display = (!q || id.includes(q)) ? '' : 'none';
+            });
+        });
+    }
+})();
 </script>
-
-
 @endsection

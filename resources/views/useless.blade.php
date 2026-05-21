@@ -213,3 +213,27 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   </body>
 </html> --}}
+
+
+
+<div class="card-container-dashboard bg-brown-gradient" {{ $txn->currency != 'INR' ? 'style=display:none;' : '' }}>
+    line 270 
+
+    @php
+    $company = Auth::user()->company()->first();
+    $services = [
+        'p12' => ['label' => '2D/3D',           'model' => \App\Models\PTwelvePaymentMethod::class],
+        'p17' => ['label' => 'P-17 Dire',       'model' => \App\Models\Direpay::class],
+        'p22' => ['label' => 'P-22 Uniqo',       'model' => \App\Models\UniqoPay::class],
+        'p23' => ['label' => 'P-23 UPI',       'model' => \App\Models\UPIPayment::class],
+    ];
+@endphp
+@foreach($services as $key => $service)
+    @if($company && $service['model']::where('company_id', $company->id)->where('status', 1)->exists())
+        <option value="{{ $key }}" {{ session('service') == $key ? 'selected' : '' }}>
+            {{ $service['label'] }}
+        </option>
+    @endif
+@endforeach
+
+service filter
