@@ -32,22 +32,22 @@
                             <th class="table-header text-center p-3">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="background: white !important">
                         @foreach ($p18co as $company)
                             <tr class="table-row">
-                                <td class="table-data text-center">
+                                <td class="table-data text-center" style="border:1px solid #B8B8B8; border-left:0">
                                     {{ $loop->iteration }}
                                 </td>
-                                <td class="table-data text-center">
+                                <td class="table-data text-center" style="border:1px solid #B8B8B8;">
                                     {{ $company->company->company_name }}
                                 </td>
-                                <td class="table-data text-center">
+                                <td class="table-data text-center" style="border:1px solid #B8B8B8;">
                                     {{ $company->company->accountId }}
                                 </td>
-                                <td class="table-data text-center">
+                                <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
                                     {{ $company->b_token }}
                                 </td>
-                                <td
+                                <td style="border:1px solid #B8B8B8; border-right:0;"
                                     class="table-data text-center @if ($company->status == '1') text-success @else text-danger @endif">
                                     @if ($company->status == '1')
                                         Active

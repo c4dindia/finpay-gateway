@@ -13,7 +13,7 @@ use Psr\Http\Message\UriInterface;
  * Request redirect middleware.
  *
  * Apply this middleware like other middleware using
- * {@see Middleware::redirect()}.
+ * {@see \GuzzleHttp\Middleware::redirect()}.
  *
  * @final
  */

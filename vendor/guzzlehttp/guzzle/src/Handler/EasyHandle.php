@@ -68,8 +68,6 @@ final class EasyHandle
      */
     public function createResponse(): void
     {
-        $this->response = null;
-
         [$ver, $status, $reason, $headers] = HeaderProcessor::parseHeaders($this->headers);
 
         $normalizedKeys = Utils::normalizeHeaderKeys($headers);

@@ -4,11 +4,33 @@ declare(strict_types=1);
 
 namespace Sabberworm\CSS\RuleSet;
 
-use function Safe\class_alias;
+use Sabberworm\CSS\Rule\Rule;
 
-if (!\class_exists(RuleContainer::class, false) && !\interface_exists(RuleContainer::class, false)) {
+/**
+ * Represents a CSS item that contains `Rules`, defining the methods to manipulate them.
+ */
+interface RuleContainer
+{
+    public function addRule(Rule $ruleToAdd, ?Rule $sibling = null): void;
+
+    public function removeRule(Rule $ruleToRemove): void;
+
+    public function removeMatchingRules(string $searchPattern): void;
+
+    public function removeAllRules(): void;
+
     /**
-     * @deprecated in v9.2, will be removed in v10.0.  Use `DeclarationList` instead, which is a direct replacement.
+     * @param array<Rule> $rules
      */
-    class_alias(DeclarationList::class, RuleContainer::class);
+    public function setRules(array $rules): void;
+
+    /**
+     * @return array<int<0, max>, Rule>
+     */
+    public function getRules(?string $searchPattern = null): array;
+
+    /**
+     * @return array<string, Rule>
+     */
+    public function getRulesAssoc(?string $searchPattern = null): array;
 }

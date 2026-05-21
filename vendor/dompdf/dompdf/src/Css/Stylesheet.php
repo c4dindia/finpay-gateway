@@ -1311,7 +1311,6 @@ EOL;
             switch ($prev) {
                 case "'":
                     $pattern = "/(?<!\\\\)'/";
-                    break;
                 case "\"":
                     $pattern = "/(?<!\\\\)\"/";
                     break;
@@ -1494,7 +1493,7 @@ EOL;
                     break;
             }
             if ($resolve_blobs === true && strpos($url, "blob://") !== false) {
-                $url = $this->_blobs[substr($url, 7)] ?? "";
+                $url = $this->_blobs[substr($url, 7)];
             }
             $path = Helpers::build_url(
                 $this->_protocol,

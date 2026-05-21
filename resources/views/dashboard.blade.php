@@ -30,15 +30,15 @@ $currentPage = 'Dashboard';
                     <th class="table-header text-center p-3">Status</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody style="background: white !important">
                 @foreach ($companies as $company)
                 <tr class="table-row">
-                    <td class="table-data text-center">{{ $loop->iteration }}</td>
-                    <td class="table-data text-start">{{ $company->company_name }}</td>
-                    <td class="table-data text-start">{{ $company->email }}</td>
-                    <td class="table-data text-start">{{ $company->password }}</td>
-                    <td class="table-data text-center">{{ \Carbon\Carbon::parse($company->created_at)->format('d M Y') }}</td>
-                    <td class="table-data text-center @if($company->status == '1')text-success @else text-danger @endif">@if($company->status == '1') Active @else Deactivated @endif</td>
+                    <td style="border:1px solid #B8B8B8; border-left:0;" class="table-data text-center">{{ $loop->iteration }}</td>
+                    <td style="border:1px solid #B8B8B8;" class="table-data text-start">{{ $company->company_name }}</td>
+                    <td style="border:1px solid #B8B8B8;" class="table-data text-start">{{ $company->email }}</td>
+                    <td style="border:1px solid #B8B8B8;" class="table-data text-start">{{ $company->password }}</td>
+                    <td style="border:1px solid #B8B8B8;" class="table-data text-center">{{ \Carbon\Carbon::parse($company->created_at)->format('d M Y') }}</td>
+                    <td style="border:1px solid #B8B8B8; border-right:0;" class="table-data text-center @if($company->status == '1')text-success @else text-danger @endif">@if($company->status == '1') Active @else Deactivated @endif</td>
                 </tr>
                 @endforeach
                 @for ($i = count($companies); $i < 15; $i++)

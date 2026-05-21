@@ -184,7 +184,7 @@ $currentPage = 'Failed-Transactions';
             </td>
 
             @if (in_array($trans->payment_status, ['Succeeded', 'Completed', 'Complete', 'Approved', 'Captured', 'Undercharged', 'Allocated', 'Paid']))
-            <td class="donebg-color " title="{{ $trans->description }}">
+            <td class="donebg-color text-nowrap d-flex align-items-center justify-content-around" title="{{ $trans->description }}">
               <span>{{ ucfirst($trans->payment_status) }}</span>
 
               @if($trans->status == 'p6')
@@ -209,7 +209,7 @@ $currentPage = 'Failed-Transactions';
               @endif
             </td>
             @elseif ($trans->payment_status == 'Declined' || $trans->payment_status == 'Cancelled' || $trans->payment_status == 'Failed')
-            <td class="failedBg-color " title="{{ $trans->description }}">
+            <td class="failedBg-color text-nowrap d-flex align-items-center justify-content-around" title="{{ $trans->description }}">
               <span>{{ ucfirst($trans->payment_status) }}</span>
 
               @if($trans->status == 'p6')
@@ -229,7 +229,7 @@ $currentPage = 'Failed-Transactions';
               @endif
             </td>
             @else
-            <td class="pendingBg-color " title="{{ $trans->description }}">
+            <td class="pendingBg-color text-nowrap d-flex align-items-center justify-content-around" title="{{ $trans->description }}">
               <span>{{ ucfirst($trans->payment_status) }}</span>
 
               @if($trans->status == 'p6')

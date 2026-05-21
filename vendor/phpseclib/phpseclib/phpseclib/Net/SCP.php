@@ -17,7 +17,7 @@
  *        exit('bad login');
  *    }
  *    $scp = new \phpseclib\Net\SCP($ssh);
- *
+
  *    $scp->put('abcd', str_repeat('x', 1024*1024));
  * ?>
  * </code>
@@ -31,6 +31,9 @@
  */
 
 namespace phpseclib\Net;
+
+use phpseclib\Net\SSH1;
+use phpseclib\Net\SSH2;
 
 /**
  * Pure-PHP implementations of SCP.
@@ -51,7 +54,7 @@ class SCP
     const SOURCE_LOCAL_FILE = 1;
     /**
      * Reads data from a string.
-     */
+    */
     const SOURCE_STRING = 2;
     /**#@-*/
 
@@ -62,18 +65,18 @@ class SCP
     */
     /**
      * SSH1 is being used.
-     */
+    */
     const MODE_SSH1 = 1;
     /**
      * SSH2 is being used.
-     */
+    */
     const MODE_SSH2 =  2;
     /**#@-*/
 
     /**
      * SSH Object
      *
-     * @var object
+     * @var Object
      * @access private
      */
     var $ssh;
@@ -81,7 +84,7 @@ class SCP
     /**
      * Packet Size
      *
-     * @var int
+     * @var Integer
      * @access private
      */
     var $packet_size;
@@ -89,26 +92,19 @@ class SCP
     /**
      * Mode
      *
-     * @var int
+     * @var Integer
      * @access private
      */
     var $mode;
-
-    /**
-     * Error information
-     *
-     * @see self::getSCPErrors()
-     * @see self::getLastSCPError()
-     * @var array
-     */
-    var $scp_errors = array();
 
     /**
      * Default Constructor.
      *
      * Connects to an SSH server
      *
-     * @param \phpseclib\Net\SSH1|\phpseclib\Net\SSH2 $ssh
+     * @param String $host
+     * @param optional Integer $port
+     * @param optional Integer $timeout
      * @return \phpseclib\Net\SCP
      * @access public
      */
@@ -140,21 +136,16 @@ class SCP
      * Currently, only binary mode is supported.  As such, if the line endings need to be adjusted, you will need to take
      * care of that, yourself.
      *
-     * @param string $remote_file
-     * @param string $data
-     * @param int $mode
-     * @param callable $callback
-     * @return bool
+     * @param String $remote_file
+     * @param String $data
+     * @param optional Integer $mode
+     * @param optional Callable $callback
+     * @return Boolean
      * @access public
      */
     function put($remote_file, $data, $mode = self::SOURCE_STRING, $callback = null)
     {
         if (!isset($this->ssh)) {
-            return false;
-        }
-
-        if (empty($remote_file)) {
-            user_error('remote_file cannot be blank', E_USER_NOTICE);
             return false;
         }
 
@@ -164,7 +155,6 @@ class SCP
 
         $temp = $this->_receive();
         if ($temp !== chr(0)) {
-            $this->_close();
             return false;
         }
 
@@ -178,14 +168,12 @@ class SCP
             $size = strlen($data);
         } else {
             if (!is_file($data)) {
-                $this->_close();
                 user_error("$data is not a valid file", E_USER_NOTICE);
                 return false;
             }
 
             $fp = @fopen($data, 'rb');
             if (!$fp) {
-                $this->_close();
                 return false;
             }
             $size = filesize($data);
@@ -195,7 +183,6 @@ class SCP
 
         $temp = $this->_receive();
         if ($temp !== chr(0)) {
-            $this->_close();
             return false;
         }
 
@@ -225,9 +212,9 @@ class SCP
      * the operation was unsuccessful.  If $local_file is defined, returns true or false depending on the success of the
      * operation
      *
-     * @param string $remote_file
-     * @param string $local_file
-     * @return mixed
+     * @param String $remote_file
+     * @param optional String $local_file
+     * @return Mixed
      * @access public
      */
     function get($remote_file, $local_file = false)
@@ -242,18 +229,7 @@ class SCP
 
         $this->_send("\0");
 
-        $info = $this->_receive();
-
-        // per https://goteleport.com/blog/scp-familiar-simple-insecure-slow/ non-zero responses mean there are errors
-        if ($info[0] === chr(1) || $info[0] == chr(2)) {
-            $type = $info[0] === chr(1) ? 'warning' : 'error';
-            $this->scp_errors[] = "$type: " . substr($info, 1);
-            $this->_close();
-            return false;
-        }
-
-        if (!preg_match('#(?<perms>[^ ]+) (?<size>\d+) (?<name>.+)#', rtrim($info), $info)) {
-            $this->_close();
+        if (!preg_match('#(?<perms>[^ ]+) (?<size>\d+) (?<name>.+)#', rtrim($this->_receive()), $info)) {
             return false;
         }
 
@@ -264,7 +240,6 @@ class SCP
         if ($local_file !== false) {
             $fp = @fopen($local_file, 'wb');
             if (!$fp) {
-                $this->_close();
                 return false;
             }
         }
@@ -272,30 +247,8 @@ class SCP
         $content = '';
         while ($size < $info['size']) {
             $data = $this->_receive();
-
-            // Terminate the loop in case the server repeatedly sends an empty response
-            if ($data === false) {
-                $this->_close();
-                user_error('No data received from server', E_USER_NOTICE);
-                return false;
-            }
-
             // SCP usually seems to split stuff out into 16k chunks
-            $length = strlen($data);
-            $size+= $length;
-            $end = $size > $info['size'];
-            if ($end) {
-                $diff = $size - $info['size'];
-                $offset = $length - $diff;
-                if ($data[$offset] === chr(0)) {
-                    $data = substr($data, 0, -$diff);
-                } else {
-                    $type = $data[$offset] === chr(1) ? 'warning' : 'error';
-                    $this->scp_errors[] = "$type: " . substr($data, 1);
-                    $this->_close();
-                    return false;
-                }
-            }
+            $size+= strlen($data);
 
             if ($local_file === false) {
                 $content.= $data;
@@ -317,7 +270,7 @@ class SCP
     /**
      * Sends a packet to an SSH server
      *
-     * @param string $data
+     * @param String $data
      * @access private
      */
     function _send($data)
@@ -335,7 +288,7 @@ class SCP
     /**
      * Receives a packet from an SSH server
      *
-     * @return string
+     * @return String
      * @access private
      */
     function _receive()
@@ -351,9 +304,6 @@ class SCP
                     $response = $this->ssh->_get_binary_packet();
                     switch ($response[SSH1::RESPONSE_TYPE]) {
                         case NET_SSH1_SMSG_STDOUT_DATA:
-                            if (strlen($response[SSH1::RESPONSE_DATA]) < 4) {
-                                return false;
-                            }
                             extract(unpack('Nlength', $response[SSH1::RESPONSE_DATA]));
                             return $this->ssh->_string_shift($response[SSH1::RESPONSE_DATA], $length);
                         case NET_SSH1_SMSG_STDERR_DATA:
@@ -385,25 +335,5 @@ class SCP
             case self::MODE_SSH1:
                 $this->ssh->disconnect();
         }
-    }
-
-    /**
-     * Returns all errors on the SCP layer
-     *
-     * @return array
-     */
-    function getSCPErrors()
-    {
-        return $this->scp_errors;
-    }
-
-    /**
-     * Returns the last error on the SCP layer
-     *
-     * @return string
-     */
-    function getLastSCPError()
-    {
-        return count($this->scp_errors) ? $this->scp_errors[count($this->scp_errors) - 1] : '';
     }
 }

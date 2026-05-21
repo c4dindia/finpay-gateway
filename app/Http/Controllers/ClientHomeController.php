@@ -82,26 +82,14 @@ class ClientHomeController extends Controller
             ->sum('amount');
 
         // -------- CHART DATA --------
-        $approvedStatuses = ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'];
-        $chartCurrency = strtoupper((string) $request->input('chartCurrency', ''));
-        if ($chartCurrency === '') {
-            $distinctCurrencies = (clone $baseQuery)
-                ->whereIn('payment_status', $approvedStatuses)
-                ->pluck('currency')
-                ->map(fn ($c) => strtoupper((string) $c))
-                ->unique()
-                ->values();
-            $chartCurrency = $distinctCurrencies->contains('INR')
-                ? 'INR'
-                : ($distinctCurrencies->first() ?? 'INR');
-        }
+        $currency = $request->input('chartCurrency') ?? 'INR';
 
         $chartQuery = DB::table('transactions')
             ->selectRaw('MONTH(created_at) as month, SUM(amount) as total_amount')
             ->whereYear('created_at', date("Y"))
-            ->whereRaw('UPPER(currency) = ?', [$chartCurrency])
+            ->where('currency', $currency)
             ->where('account_id', $accId)
-            ->whereIn('payment_status', $approvedStatuses);
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured','Paid']);
 
         if ($serviceFilter != 'all') {
            $chartQuery = $chartQuery->where('status', $serviceFilter);
@@ -138,7 +126,6 @@ class ClientHomeController extends Controller
             'eurTotal',
             'cadTotal',
             'inrTotal',
-            'chartCurrency',
             'months',
             'amounts',
             'totalTransactions',

@@ -62,6 +62,7 @@ $currentPage = 'Transactions';
             </div>
 
             <div class="d-flex gap-3">
+
               <div>
                 @php $selectedName = request('name', 'total'); @endphp
                 <select name="name" id="name" class="form-select trans-select" onchange="this.form.submit()" required>
@@ -225,7 +226,7 @@ $currentPage = 'Transactions';
 
 
             @if (in_array($trans->payment_status, ['Succeeded', 'Completed', 'Complete', 'Approved', 'Captured', 'Undercharged', 'Overcharged', 'Allocated', 'Paid']))
-            <td class="donebg-color " title="{{ $trans->description }}">
+            <td class="donebg-color text-nowrap d-flex align-items-center justify-content-around" title="{{ $trans->description }}">
               <span>{{ ucfirst($trans->payment_status) }}</span>
 
               @if($trans->status == 'p6')
@@ -250,7 +251,7 @@ $currentPage = 'Transactions';
               @endif
             </td>
             @elseif ($trans->payment_status == 'Declined' || $trans->payment_status == 'Cancelled' || $trans->payment_status == 'Failed')
-            <td class="failedBg-color " title="{{ $trans->description }}">
+            <td class="failedBg-color text-nowrap d-flex align-items-center justify-content-around" title="{{ $trans->description }}">
               <span>{{ ucfirst($trans->payment_status) }}</span>
 
               @if($trans->status == 'p6')
@@ -275,7 +276,7 @@ $currentPage = 'Transactions';
               @endif
             </td>
             @else
-            <td class="pendingBg-color " title="{{ $trans->description }}">
+            <td class="pendingBg-color text-nowrap d-flex align-items-center justify-content-around" title="{{ $trans->description }}">
               <span>{{ ucfirst($trans->payment_status) }}</span>
 
               @if($trans->status == 'p6')
@@ -322,7 +323,15 @@ $currentPage = 'Transactions';
           </tr>
 
           @endforeach
-        
+          @if (count($transactions) < 15)
+            @for ($i=0; $i < 15 - count($transactions); $i++)
+            <tr class="no-hover">
+            <td colspan="7" style="{{ $i == 0 ? 'border:0;border-top:1px solid #B8B8B8' : 'border: none;' }}">&nbsp;
+            </td> {{--
+                    assuming your table has 7 columns --}}
+            </tr>
+            @endfor
+            @endif
             @endif
 
         </tbody>
