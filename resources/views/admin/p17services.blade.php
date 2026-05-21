@@ -32,22 +32,22 @@ $currentPage = 'p17 Services';
                     <th class="table-header text-center p-3">Status</th>
                 </tr>
             </thead>
-            <tbody style="background: white !important">
+            <tbody>
                 @foreach ($p17co as $company)
                 <tr class="table-row">
-                    <td class="table-data text-center" style="border:1px solid #B8B8B8; border-left:0">
+                    <td class="table-data text-center">
                         {{ $loop->iteration }}
                     </td>
-                    <td class="table-data text-center" style="border:1px solid #B8B8B8;">
+                    <td class="table-data text-center">
                         {{ $company->company->company_name }}
                     </td>
-                    <td class="table-data text-center" style="border:1px solid #B8B8B8;">
+                    <td class="table-data text-center">
                         {{ $company->company->accountId }}
                     </td>
-                    <td class="table-data text-center" style="border:1px solid #B8B8B8; border-right:0">
+                    <td class="table-data text-center">
                         {{ $company->b_token }}
                     </td>
-                    <td style="border:1px solid #B8B8B8; border-right:0;" class="table-data text-center @if($company->status == '1')text-success @else text-danger @endif">@if($company->status == '1') Active @else Deactivated @endif</td>
+                    <td class="table-data text-center @if($company->status == '1')text-success @else text-danger @endif">@if($company->status == '1') Active @else Deactivated @endif</td>
                 </tr>
                 @endforeach
                 @for ($i = count($p17co); $i < 15; $i++)
