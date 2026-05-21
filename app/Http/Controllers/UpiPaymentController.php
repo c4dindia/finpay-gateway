@@ -155,20 +155,29 @@ class UpiPaymentController extends Controller
 
         $vpaLimit = UpiMerchant::where('vpa', $checkacc->vpa)->first()['limitPerDay'] ?? 0;
 
-        $newMerchant = UpiMerchant::where('status', '1')
-            ->where('vpa', '!=', $checkacc->vpa)
-            ->inRandomOrder()
-            ->first();
-
-
         if ($vpaLimit > 0 && ($vpaTotalAmount + $validated['amount']) > $vpaLimit) {
             UpiMerchant::where('vpa', $checkacc->vpa)->update([
                 'status' => '0',
             ]);
-            
-            $checkacc->mid = $newMerchant->mid;
-            $checkacc->vpa = $newMerchant->vpa;
+
+            $newMerchant = UpiMerchant::where('status', '1')
+                ->where('vpa', '!=', $checkacc->vpa)
+                ->inRandomOrder()
+                ->first();
+
+            if ($newMerchant) {
+                $checkacc->mid = $newMerchant->mid;
+                $checkacc->vpa = $newMerchant->vpa;
+            } else {
+                $checkacc->mid = null;
+                $checkacc->vpa = null;
+            }
             $checkacc->save();
+        }
+
+        if (!$checkacc->mid || !$checkacc->vpa) {
+            Log::warning("No active merchant available for Account ID: " . $accId);
+            return response()->json(['error' => 'Something went wrong, please try again!'], 503);
         }
 
 
@@ -313,9 +322,19 @@ class UpiPaymentController extends Controller
                 ->inRandomOrder()
                 ->first();
 
-            $checkacc->mid = $newMerchant->mid;
-            $checkacc->vpa = $newMerchant->vpa;
+            if ($newMerchant) {
+                $checkacc->mid = $newMerchant->mid;
+                $checkacc->vpa = $newMerchant->vpa;
+            } else {
+                $checkacc->mid = null;
+                $checkacc->vpa = null;
+            }
             $checkacc->save();
+        }
+
+        if (!$checkacc->mid || !$checkacc->vpa) {
+            Log::warning("No active merchant available for Account ID: " . $checkacc->accountId);
+            abort(503, 'Something went wrong, please try again!');
         }
 
         $method = '';
