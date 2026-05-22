@@ -1958,7 +1958,7 @@ html * {
     color: #fff;
     position: relative;
     overflow: hidden;
-    min-height: 130px;
+    min-height: 0;
     background-image: linear-gradient(
         162.822deg,
         rgb(15, 35, 25) 0%,
@@ -2047,12 +2047,13 @@ html * {
 /* Consistent KPI card spacing for all currencies */
 .fd-kpi .fd-kpi-inner,
 .fd-kpi--inr .fd-kpi-inner {
-    padding: 40px;
+    padding: 24px;
 }
 .fd-kpi-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
 }
 .fd-kpi-icon {
     width: 36px;
@@ -2289,7 +2290,7 @@ html * {
     align-items: center;
     justify-content: center;
     font-family: "JetBrains Mono", monospace !important;
-    font-size: 14px;
+    font-size: 10px;
     font-weight: 700;
     flex-shrink: 0;
     color: #fff;
@@ -2340,8 +2341,8 @@ html * {
 }
 .fd-row-date {
     font-size: 10px;
-    color: #21232b;
-    font-weight: 400;
+    color: var(--fd-muted, #6b7494);
+    font-weight: 500;
 }
 .fd-row-right {
     text-align: right;
@@ -2372,9 +2373,9 @@ html * {
     filter: brightness(2);
 }
 .fd-status .dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 2.5px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
     flex-shrink: 0;
     background: #15803d;
     box-shadow: 0 0 5px rgba(21, 128, 61, 0.5);
@@ -2552,13 +2553,13 @@ html * {
 }
 .fd-meter-track {
     flex: 1;
-    height: 4px;
+    height: 6px;
     border-radius: 99px;
     background: rgba(10, 15, 30, 0.08);
     overflow: hidden;
 }
 .fd-meter-fill {
-    height: 4px;
+    height: 6px;
     border-radius: 99px;
     background: linear-gradient(90deg, var(--mc) 0%, var(--mc) 100%);
     box-shadow: 0 0 8px 0 var(--mc);

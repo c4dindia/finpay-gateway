@@ -82,21 +82,38 @@ class ClientHomeController extends Controller
             ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
-        // -------- CHART DATA --------
         $approvedStatuses = ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'];
-        $chartCurrency = strtoupper((string) $request->input('chartCurrency', ''));
+
+        // -------- TABLE TRANSACTIONS (needed before chart currency is finalized) --------
+        $totalTransactions = $baseQuery->get();
+
+        $chartCurrencyOptions = $totalTransactions
+            ->pluck('currency')
+            ->map(fn ($c) => strtoupper(trim((string) $c)))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $chartCurrency = strtoupper(trim((string) $request->input('chartCurrency', '')));
         if ($chartCurrency === '') {
-            $distinctCurrencies = (clone $baseQuery)
+            $approvedCurrencies = $totalTransactions
                 ->whereIn('payment_status', $approvedStatuses)
                 ->pluck('currency')
-                ->map(fn($c) => strtoupper((string) $c))
+                ->map(fn ($c) => strtoupper(trim((string) $c)))
+                ->filter()
                 ->unique()
                 ->values();
-            $chartCurrency = $distinctCurrencies->contains('INR')
+
+            $chartCurrency = $approvedCurrencies->contains('INR')
                 ? 'INR'
-                : ($distinctCurrencies->first() ?? 'INR');
+                : ($approvedCurrencies->first() ?? 'INR');
         }
 
+        if (! $chartCurrencyOptions->contains($chartCurrency)) {
+            $chartCurrency = $chartCurrencyOptions->first() ?? $chartCurrency;
+        }
+
+        // -------- CHART DATA --------
         $chartQuery = DB::table('transactions')
             ->selectRaw('MONTH(created_at) as month, SUM(amount) as total_amount')
             ->whereYear('created_at', date("Y"))
@@ -119,9 +136,6 @@ class ClientHomeController extends Controller
             $months[] = date('M', mktime(0, 0, 0, $i, 1));
             $amounts[] = $monthData ? (float)$monthData->total_amount : 0;
         }
-
-        // -------- TABLE TRANSACTIONS --------
-        $totalTransactions = $baseQuery->get();
 
         // -------- JS Transactions --------
         $totalTransactionsJSbeforeCondition = Transaction::where('account_id', $accId)->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);

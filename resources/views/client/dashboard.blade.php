@@ -81,8 +81,163 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         100% { background-position: -200% 0; }
     }
 
+    /* Dashboard stats band — KPI + 2×2 metrics */
+    .fd-stats-band > .row {
+        align-items: stretch;
+        --bs-gutter-x: 14px;
+        --bs-gutter-y: 14px;
+    }
+    .fd-stats-band .fd-kpi {
+        height: 100%;
+    }
+    .fd-stats-band .fd-kpi.fd-kpi--compact .fd-kpi-inner {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: 100%;
+        padding: 20px 22px 24px;
+        position: relative;
+    }
+    .fd-stats-band .fd-kpi .fd-kpi-inner::after {
+        height: 2px;
+        left: 20px;
+        right: 20px;
+        bottom: 14px;
+        opacity: 0.75;
+    }
+    .fd-stats-band .fd-kpi-top {
+        min-height: 36px;
+        align-items: center;
+        gap: 12px;
+    }
+    .fd-stats-band .fd-kpi-amount {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        margin: 10px 0 6px;
+        font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.15;
+    }
+    .fd-stats-band .fd-kpi-sub {
+        margin: 0;
+        padding-bottom: 6px;
+    }
+    .fd-stats-metrics {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+    .fd-stats-metrics > .row {
+        flex: 1;
+        --bs-gutter-x: 12px;
+        --bs-gutter-y: 12px;
+    }
+    .fd-stats-metrics .fd-metric {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        padding: 16px 18px 18px;
+        border-radius: 18px;
+        border-width: 1px;
+        background: linear-gradient(168deg, #141c2e 0%, #0f1525 55%, #0d121f 100%);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.04) inset,
+            0 8px 24px -6px rgba(0, 0, 0, 0.35);
+    }
+    .fd-stats-metrics .fd-metric::before {
+        width: 72px;
+        height: 72px;
+        top: -18px;
+        right: 14px;
+        opacity: 0.14;
+        filter: blur(18px);
+    }
+    .fd-stats-metrics .fd-metric:hover {
+        transform: none;
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.05) inset,
+            0 10px 28px -6px rgba(0, 0, 0, 0.4);
+    }
+    .fd-stats-metrics .fd-metric-head {
+        flex-shrink: 0;
+    }
+    .fd-stats-metrics .fd-metric-label {
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        font-weight: 800;
+    }
+    .fd-stats-metrics .fd-metric-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+    }
+    .fd-stats-metrics .fd-metric .val {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        margin: 4px 0 8px;
+        font-size: clamp(1.65rem, 2.5vw, 2rem);
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+    .fd-stats-metrics .fd-meter {
+        margin-top: auto;
+        padding-top: 2px;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .fd-stats-metrics .fd-meter-track {
+        height: 5px;
+        background: rgba(255, 255, 255, 0.07);
+    }
+    .fd-stats-metrics .fd-meter-fill {
+        height: 5px;
+        border-radius: 99px;
+        background: linear-gradient(90deg, color-mix(in srgb, var(--mc) 70%, transparent), var(--mc));
+    }
+    .fd-stats-metrics .fd-foot {
+        font-size: 10px;
+        min-width: 3.2em;
+        text-align: right;
+    }
+    .fd-root.is-dark .fd-stats-metrics .fd-metric {
+        background: linear-gradient(168deg, #151d32 0%, #0f1525 50%, #0b0f1a 100%);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+    .fd-root.is-dark .fd-stats-metrics .fd-metric.green { border-color: rgba(16, 185, 129, 0.2); }
+    .fd-root.is-dark .fd-stats-metrics .fd-metric.amber { border-color: rgba(245, 158, 11, 0.2); }
+    .fd-root.is-dark .fd-stats-metrics .fd-metric.red { border-color: rgba(239, 68, 68, 0.2); }
+    .fd-root.is-dark .fd-stats-metrics .fd-metric.violet { border-color: rgba(99, 102, 241, 0.22); }
+    @media (min-width: 1200px) {
+        .fd-stats-band .fd-kpi-amount {
+            font-size: 1.65rem;
+        }
+    }
+    .fd-root:not(.is-dark) .fd-stats-metrics .fd-metric {
+        background: var(--fd-card);
+        box-shadow: 0 4px 20px -4px rgba(10, 15, 30, 0.08);
+    }
+    .fd-root:not(.is-dark) .fd-stats-metrics .fd-meter-track {
+        background: rgba(10, 15, 30, 0.08);
+    }
+
+    .fd-toolbar {
+        padding: 12px 16px;
+        align-items: center;
+    }
+    .fd-label {
+        line-height: 1;
+        padding-top: 1px;
+    }
+
     .fd-amount-summary {
-        padding: 22px 24px 24px;
+        padding: 20px 20px 22px;
     }
     .fd-amount-summary-title {
         margin: 0 0 18px;
@@ -94,15 +249,18 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     .fd-amount-summary-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
+        gap: 10px;
+        align-items: stretch;
     }
     .fd-amt-stat {
         border-radius: 14px;
-        padding: 16px 14px;
+        padding: 14px 12px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        justify-content: center;
+        gap: 6px;
         min-width: 0;
+        text-align: center;
     }
     .fd-amt-stat-label {
         font-size: 10px;
@@ -113,10 +271,54 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     }
     .fd-amt-stat-value {
         font-family: "JetBrains Mono", monospace;
-        font-size: 17px;
+        font-size: 15px;
         font-weight: 700;
         line-height: 1.2;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .fd-card-value {
+        font-size: 22px;
+        letter-spacing: -0.02em;
+    }
+    .fd-tx-head .fd-link {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: background 0.15s, color 0.15s;
+    }
+    .fd-tx-head .fd-link:hover {
+        background: rgba(80, 70, 228, 0.1);
+    }
+    .fd-root.is-dark .fd-tx-head .fd-link {
+        color: #818cf8;
+    }
+    .fd-root.is-dark .fd-tx-head .fd-link:hover {
+        background: rgba(129, 140, 248, 0.12);
+        color: #a5b4fc;
+    }
+    .fd-status .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+    .fd-status.is-failed .lbl {
+        color: #f87171;
+    }
+    .fd-kpi.fd-kpi--compact {
+        min-height: 0;
+    }
+    .fd-cur-badge {
+        font-size: 10px;
+        letter-spacing: 0.02em;
+    }
+    .fd-row {
+        align-items: center;
+    }
+    .fd-volume-chart .fd-card-head {
+        align-items: center;
     }
     .fd-amt-stat--received {
         background: #eff6ff;
@@ -137,8 +339,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         color: #059669;
     }
     .fd-amt-stat--balance {
-        background: var(--fd-card);
-        border: 1px solid var(--fd-line);
+        background: #ecfdf5;
     }
     .fd-amt-stat--balance .fd-amt-stat-label {
         color: #6b7280;
@@ -155,7 +356,8 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     .fd-root.is-dark .fd-amt-stat--received .fd-amt-stat-value {
         color: #60a5fa;
     }
-    .fd-root.is-dark .fd-amt-stat--settled {
+    .fd-root.is-dark .fd-amt-stat--settled,
+    .fd-root.is-dark .fd-amt-stat--balance {
         background: rgba(16, 185, 129, 0.12);
     }
     .fd-root.is-dark .fd-amt-stat--settled .fd-amt-stat-label,
@@ -222,21 +424,30 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         'INR'  => ['total' => $inrTotal ?? 0,  'icon' => '₹',  'slug' => 'inr'],
     ];
 
-    $chartCurrencies = $totalTransactions
-        ->sortBy(fn ($txn) => [$txn->currency === 'INR' ? 0 : 1, $txn->currency])
-        ->unique('currency');
+    $chartCurrencyOptions = $totalTransactions
+        ->pluck('currency')
+        ->map(fn ($c) => strtoupper(trim((string) $c)))
+        ->filter()
+        ->unique()
+        ->values();
 
-    $defaultChartCurrency = strtoupper($chartCurrency ?? 'INR');
-
-    $defaultChartSymbol = match ($defaultChartCurrency) {
-        'INR' => '₹',
-        'EUR' => '€',
-        'GBP' => '£',
-        default => '$',
-    };
+    $mainCurrency = strtoupper(trim((string) $chartCurrency));
+    if (! $chartCurrencyOptions->contains($mainCurrency)) {
+        $mainCurrency = $chartCurrencyOptions->first() ?? $mainCurrency;
+    }
 
     // Same captured totals as KPI cards (approved/paid only), not all payment statuses
-    $defaultChartTotal = (float) ($currencyKpis[$defaultChartCurrency]['total'] ?? 0);
+    $defaultChartTotal = (float) ($currencyKpis[$mainCurrency]['total'] ?? 0);
+
+    $currencyTotalsJs = [
+        'USD' => (float) ($usdTotal ?? 0),
+        'GBP' => (float) ($gbpTotal ?? 0),
+        'USDT' => (float) ($usdtTotal ?? 0),
+        'ETH' => (float) ($ethTotal ?? 0),
+        'EUR' => (float) ($eurTotal ?? 0),
+        'CAD' => (float) ($cadTotal ?? 0),
+        'INR' => (float) ($inrTotal ?? 0),
+    ];
 @endphp
 
 <div id="fdShell">
@@ -254,29 +465,49 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     <div class="row g-3 fd-equal-row">
         <div class="col-12 col-xxl-8">
             <div class="row g-3">
-                @foreach ($currencyKpis as $code => $kpi)
-                    @if ($activeCurrencies->contains($code))
-                        <div class="col-12 {{ $activeCurrencies->count() > 1 ? 'col-md-6' : '' }}">
-                            <div class="fd-kpi">
-                                <div class="fd-kpi-inner">
-                                    <div class="fd-kpi-top">
-                                        <div class="fd-kpi-icon">{{ $kpi['icon'] }}</div>
-                                        <span class="fd-kpi-filter-wrap">
-                                            <select class="fd-kpi-filter" id="kpiRange-{{ $kpi['slug'] }}" aria-label="{{ $code }} time filter" data-currency="{{ $code }}">
-                                                <option value="total" selected>Total</option>
-                                                <option value="thisMonth">This month</option>
-                                                <option value="lastMonth">Last month</option>
-                                                <option value="lastFewMonths">Last 3 months</option>
-                                            </select>
-                                        </span>
+                <div class="col-12 fd-stats-band">
+                    <div class="row g-3 align-items-stretch">
+                        @foreach ($currencyKpis as $code => $kpi)
+                            @if ($activeCurrencies->contains($code))
+                                <div class="col-12 {{ $activeCurrencies->count() === 1 ? 'col-lg-5' : 'col-md-6' }}">
+                                    <div class="fd-kpi fd-kpi--compact">
+                                        <div class="fd-kpi-inner">
+                                            <div class="fd-kpi-top">
+                                                <div class="fd-kpi-icon">{{ $kpi['icon'] }}</div>
+                                                <span class="fd-kpi-filter-wrap">
+                                                    <select class="fd-kpi-filter" id="kpiRange-{{ $kpi['slug'] }}" aria-label="{{ $code }} time filter" data-currency="{{ $code }}">
+                                                        <option value="total" selected>Total</option>
+                                                        <option value="thisMonth">This month</option>
+                                                        <option value="lastMonth">Last month</option>
+                                                        <option value="lastFewMonths">Last 3 months</option>
+                                                    </select>
+                                                </span>
+                                            </div>
+                                            <div class="fd-kpi-amount">{{ $code }} <span id="kpiAmount-{{ $kpi['slug'] }}" style="margin-left: 6px;">{{ number_format((float) $kpi['total'], 2) }}</span></div>
+                                            <div class="fd-kpi-sub"><small id="kpiSub-{{ $kpi['slug'] }}">All time</small></div>
+                                        </div>
                                     </div>
-                                    <div class="fd-kpi-amount">{{ $code }} <span id="kpiAmount-{{ $kpi['slug'] }}">{{ number_format((float) $kpi['total'], 2) }}</span></div>
-                                    <div class="fd-kpi-sub"><small id="kpiSub-{{ $kpi['slug'] }}">Total {{ $code }}</small></div>
+                                </div>
+                            @endif
+                        @endforeach
+
+                        @if ($activeCurrencies->count() === 1)
+                            <div class="col-12 col-lg-7 fd-stats-metrics">
+                                <div class="row g-3 h-100">
+                                    @include('client.partials.dashboard-metrics', array_merge(compact('capturedCount', 'capturedPercentage', 'awaitingCount', 'awaitingPercentage', 'failedCount', 'failedPercentage', 'totalCount'), ['metricCols' => 'col-6']))
                                 </div>
                             </div>
+                        @endif
+                    </div>
+                </div>
+
+                @if ($activeCurrencies->count() !== 1)
+                    <div class="col-12">
+                        <div class="row g-3">
+                            @include('client.partials.dashboard-metrics', array_merge(compact('capturedCount', 'capturedPercentage', 'awaitingCount', 'awaitingPercentage', 'failedCount', 'failedPercentage', 'totalCount'), ['metricCols' => 'col-12 col-md-6 col-lg-3']))
                         </div>
-                    @endif
-                @endforeach
+                    </div>
+                @endif
 
                 <div class="col-12">
                     <div class="fd-card fd-volume-chart" id="volumeChartCard">
@@ -284,15 +515,14 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                             <div>
                                 <div class="fd-card-title">Transaction Volume</div>
                                 <div class="fd-card-value" id="chartTotalValue">
-                                    {{ $defaultChartSymbol . number_format($defaultChartTotal, 2) }}
+                                    <span id="chartTotalCurrency">{{ $mainCurrency }}</span> <span id="chartTotalAmount">{{ number_format($defaultChartTotal, 2) }}</span>
                                 </div>
                             </div>
                             <div class="text-end">
                                 <span class="fd-select-wrap">
                                     <select class="fd-select" id="currencySelect" aria-label="Chart currency">
-                                        @foreach ($chartCurrencies as $txn)
-                                            @php $optCur = strtoupper($txn->currency ?? 'USD'); @endphp
-                                            <option value="{{ $optCur }}" {{ $optCur === $defaultChartCurrency ? 'selected' : '' }}>{{ $optCur }}</option>
+                                        @foreach ($chartCurrencyOptions as $optCur)
+                                            <option value="{{ $optCur }}" {{ $optCur === $mainCurrency ? 'selected' : '' }}>{{ $optCur }}</option>
                                         @endforeach
                                     </select>
                                 </span>
@@ -347,15 +577,10 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                             }
                             $amount = $trans->settled_amount ?? $trans->amount;
                             $cur = strtoupper($trans->currency ?? 'USD');
-                            $sym = match ($cur) {
-                                'INR' => '₹',
-                                'EUR' => '€',
-                                'GBP' => '£',
-                                'USDT' => '₮',
-                                'ETH' => 'Ξ',
-                                'CAD' => 'C$',
-                                default => '$',
-                            };
+                            $checkoutId = (string) $trans->checkout_id;
+                            $shortId = strlen($checkoutId) > 22
+                                ? substr($checkoutId, 0, 10) . '…' . substr($checkoutId, -8)
+                                : $checkoutId;
                             $curClass = match ($cur) {
                                 'INR' => 'fd-cur-inr',
                                 'USD' => 'fd-cur-usd',
@@ -363,13 +588,13 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                             };
                         @endphp
                         <div class="fd-row" data-id="{{ $trans->checkout_id }}">
-                            <div class="fd-cur-badge {{ $curClass }}">{{ $sym }}</div>
+                            <div class="fd-cur-badge {{ $curClass }}">{{ $cur }}</div>
                             <div class="fd-row-mid">
-                                <div class="fd-row-id">{{ $trans->checkout_id }}</div>
+                                <div class="fd-row-id" title="{{ $checkoutId }}">{{ $shortId }}</div>
                                 <div class="fd-row-date">{{ \Carbon\Carbon::parse($trans->created_at)->format('d/m/Y') }}</div>
                             </div>
                             <div class="fd-row-right">
-                                <div class="fd-row-amt {{ $cls }}">{{ $sym }}{{ number_format((float) $amount, 2) }}</div>
+                                <div class="fd-row-amt {{ $cls }}">{{ $cur }} {{ number_format((float) $amount, 2) }}</div>
                                 <div class="fd-status {{ $cls }}">
                                     <span class="dot"></span>
                                     <span class="lbl">{{ ucfirst($trans->payment_status) }}</span>
@@ -381,72 +606,6 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
             </div>
         </div>
 
-        <div class="col-12">
-            <div class="row g-3">
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="fd-metric green">
-                        <div class="fd-metric-head">
-                            <span class="fd-metric-label">Captured</span>
-                            <div class="fd-metric-icon">
-                                <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 6.5L5 9.5L11 3.5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </div>
-                        </div>
-                        <div class="val">{{ $capturedCount }}</div>
-                        <div class="fd-meter">
-                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:{{ min($capturedPercentage, 100) }}%"></div></div>
-                            <span class="fd-foot">{{ number_format($capturedPercentage, 2) }}%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="fd-metric amber">
-                        <div class="fd-metric-head">
-                            <span class="fd-metric-label">Awaiting</span>
-                            <div class="fd-metric-icon">
-                                <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="6.5" cy="6.5" r="4" stroke="#f59e0b" stroke-width="1.5"/><path d="M6.5 4.5V6.5L7.5 7.5" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/></svg>
-                            </div>
-                        </div>
-                        <div class="val">{{ $awaitingCount }}</div>
-                        <div class="fd-meter">
-                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:{{ min($awaitingPercentage, 100) }}%"></div></div>
-                            <span class="fd-foot">{{ number_format($awaitingPercentage, 2) }}%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="fd-metric red">
-                        <div class="fd-metric-head">
-                            <span class="fd-metric-label">Failed</span>
-                            <div class="fd-metric-icon">
-                                <svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4L9 9M9 4L4 9" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>
-                            </div>
-                        </div>
-                        <div class="val">{{ $failedCount }}</div>
-                        <div class="fd-meter">
-                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:{{ min($failedPercentage, 100) }}%"></div></div>
-                            <span class="fd-foot">{{ number_format($failedPercentage, 2) }}%</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="fd-metric violet">
-                        <div class="fd-metric-head">
-                            <span class="fd-metric-label">Total</span>
-                            <div class="fd-metric-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
-                                    <path d="M11.9167 6.49998H10.5734C10.3366 6.49947 10.1063 6.57652 9.91748 6.71934C9.72869 6.86215 9.59187 7.06288 9.52796 7.29081L8.25504 11.8191C8.24684 11.8473 8.22973 11.872 8.20629 11.8896C8.18285 11.9071 8.15434 11.9166 8.12504 11.9166C8.09574 11.9166 8.06723 11.9071 8.04379 11.8896C8.02035 11.872 8.00325 11.8473 7.99504 11.8191L5.00504 1.18081C4.99684 1.15268 4.97973 1.12798 4.95629 1.1104C4.93285 1.09282 4.90434 1.08331 4.87504 1.08331C4.84574 1.08331 4.81723 1.09282 4.79379 1.1104C4.77035 1.12798 4.75324 1.15268 4.74504 1.18081L3.47212 5.70915C3.40846 5.93619 3.27246 6.13626 3.08476 6.27899C2.89706 6.42171 2.66792 6.49931 2.43212 6.49998H1.08337" stroke="#818CF8" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="val">{{ $totalCount }}</div>
-                        <div class="fd-meter">
-                            <div class="fd-meter-track"><div class="fd-meter-fill" style="width:100%"></div></div>
-                            <span class="fd-foot">100.00%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -652,32 +811,20 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
 
     const allTransactions = @json($totalTransactionsJS);
 
-    function currencyTotal(currency) {
-        let sum = 0;
-        for (const t of (allTransactions || [])) {
-            if (!t || (t.currency || '').toUpperCase() !== currency) continue;
-            const amt = parseFloat(t.amount);
-            if (Number.isFinite(amt)) sum += amt;
-        }
-        return sum;
-    }
-
-    function currencySymbol(currency) {
-        const map = { USD: '$', INR: '₹', EUR: '€', GBP: '£', USDT: '₮', ETH: 'Ξ', CAD: 'C$' };
-        return map[currency] || (currency + ' ');
-    }
+    const currencyTotals = @json($currencyTotalsJs);
 
     function syncChartHeader(currency) {
-        if (!chartTotalValue) return;
-        const total = currencyTotal(currency);
-        const sym = currencySymbol(currency);
-        chartTotalValue.textContent = total > 0
-            ? sym + new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)
-            : sym + '0.00';
+        const total = parseFloat(currencyTotals[currency] ?? 0);
+        const formatted = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total);
+
+        const curEl = document.getElementById('chartTotalCurrency');
+        const amtEl = document.getElementById('chartTotalAmount');
+
+        if (curEl) curEl.textContent = currency;
+        if (amtEl) amtEl.textContent = formatted;
     }
 
     const currencySelect = document.getElementById('currencySelect');
-    const chartTotalValue = document.getElementById('chartTotalValue');
 
     function onCurrencyChange() {
         const currency = this.value;
@@ -705,6 +852,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         window._updateAmountChartTheme = function(dark) { applyChartTheme(dark, 'none'); };
         if (currencySelect) {
             currencySelect.addEventListener('change', onCurrencyChange);
+            syncChartHeader(currencySelect.value);
         }
     }
 
@@ -759,12 +907,12 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         function updateAmount() {
             const range = select.value;
             const labels = {
-                total: 'Total ' + currency,
-                thisMonth: 'This month · ' + currency,
-                lastMonth: 'Last month · ' + currency,
-                lastFewMonths: 'Last 3 months · ' + currency,
+                total: 'All time',
+                thisMonth: 'This month',
+                lastMonth: 'Last month',
+                lastFewMonths: 'Last 3 months',
             };
-            if (subEl) subEl.innerText = labels[range] || ('Total ' + currency);
+            if (subEl) subEl.innerText = labels[range] || 'All time';
 
             const filtered = filterByDate(range);
             const sum = filtered.reduce(function(acc, t) {
