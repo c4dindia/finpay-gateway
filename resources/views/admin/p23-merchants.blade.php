@@ -201,8 +201,12 @@ $currentPage = 'Manage VPAs';
                             {{ number_format($company->successRate, 2) ?? 0 }} %
                         </td>
 
-                        <td class="table-data text-center @if($company->status == '1') text-success @else text-danger @endif">
-                            @if($company->status == '1') Active @else Deactivated @endif
+                        <td class="table-data text-center">
+                            @if($company->status == '1')
+                            <span class="fd-status-pill fd-status-success">Active</span>
+                            @else
+                            <span class="fd-status-pill fd-status-danger">Deactivated</span>
+                            @endif
                         </td>
 
                         <td class="table-data text-center">
@@ -293,8 +297,12 @@ $currentPage = 'Manage VPAs';
                 </div>
                 <div class="vpa-mobile-field">
                     <span class="card-el-head">Status</span>
-                    <span class="card-el-content @if($company->status == '1') statusSuccess @else statusdanger @endif">
-                        @if($company->status == '1') Active @else Deactivated @endif
+                    <span class="card-el-content">
+                        @if($company->status == '1')
+                        <span class="fd-status-pill fd-status-success">Active</span>
+                        @else
+                        <span class="fd-status-pill fd-status-danger">Deactivated</span>
+                        @endif
                     </span>
                 </div>
             </div>

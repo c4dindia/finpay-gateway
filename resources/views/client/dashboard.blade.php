@@ -80,6 +80,100 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         0% { background-position: 200% 0; }
         100% { background-position: -200% 0; }
     }
+
+    .fd-amount-summary {
+        padding: 22px 24px 24px;
+    }
+    .fd-amount-summary-title {
+        margin: 0 0 18px;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--fd-ink);
+    }
+    .fd-amount-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+    .fd-amt-stat {
+        border-radius: 14px;
+        padding: 16px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+    .fd-amt-stat-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        line-height: 1.2;
+    }
+    .fd-amt-stat-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 17px;
+        font-weight: 700;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+    .fd-amt-stat--received {
+        background: #eff6ff;
+    }
+    .fd-amt-stat--received .fd-amt-stat-label {
+        color: #64748b;
+    }
+    .fd-amt-stat--received .fd-amt-stat-value {
+        color: #2563eb;
+    }
+    .fd-amt-stat--settled {
+        background: #ecfdf5;
+    }
+    .fd-amt-stat--settled .fd-amt-stat-label {
+        color: #6b7280;
+    }
+    .fd-amt-stat--settled .fd-amt-stat-value {
+        color: #059669;
+    }
+    .fd-amt-stat--balance {
+        background: var(--fd-card);
+        border: 1px solid var(--fd-line);
+    }
+    .fd-amt-stat--balance .fd-amt-stat-label {
+        color: #6b7280;
+    }
+    .fd-amt-stat--balance .fd-amt-stat-value {
+        color: #059669;
+    }
+    .fd-root.is-dark .fd-amt-stat--received {
+        background: rgba(37, 99, 235, 0.12);
+    }
+    .fd-root.is-dark .fd-amt-stat--received .fd-amt-stat-label {
+        color: rgba(148, 163, 184, 0.9);
+    }
+    .fd-root.is-dark .fd-amt-stat--received .fd-amt-stat-value {
+        color: #60a5fa;
+    }
+    .fd-root.is-dark .fd-amt-stat--settled {
+        background: rgba(16, 185, 129, 0.12);
+    }
+    .fd-root.is-dark .fd-amt-stat--settled .fd-amt-stat-label,
+    .fd-root.is-dark .fd-amt-stat--balance .fd-amt-stat-label {
+        color: rgba(148, 163, 184, 0.85);
+    }
+    .fd-root.is-dark .fd-amt-stat--settled .fd-amt-stat-value,
+    .fd-root.is-dark .fd-amt-stat--balance .fd-amt-stat-value {
+        color: #34d399;
+    }
+    @media (max-width: 575.98px) {
+        .fd-amount-summary-grid {
+            grid-template-columns: 1fr;
+        }
+        .fd-amt-stat-value {
+            font-size: 18px;
+        }
+    }
 </style>
 @endsection
 
@@ -158,7 +252,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     </div>
 
     <div class="row g-3 fd-equal-row">
-        <div class="col-12 col-lg-8">
+        <div class="col-12 col-xxl-8">
             <div class="row g-3">
                 @foreach ($currencyKpis as $code => $kpi)
                     @if ($activeCurrencies->contains($code))
@@ -194,12 +288,14 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                                 </div>
                             </div>
                             <div class="text-end">
-                                <select class="fd-select" id="currencySelect" aria-label="Chart currency">
-                                    @foreach ($chartCurrencies as $txn)
-                                        @php $optCur = strtoupper($txn->currency ?? 'USD'); @endphp
-                                        <option value="{{ $optCur }}" {{ $optCur === $defaultChartCurrency ? 'selected' : '' }}>{{ $optCur }}</option>
-                                    @endforeach
-                                </select>
+                                <span class="fd-select-wrap">
+                                    <select class="fd-select" id="currencySelect" aria-label="Chart currency">
+                                        @foreach ($chartCurrencies as $txn)
+                                            @php $optCur = strtoupper($txn->currency ?? 'USD'); @endphp
+                                            <option value="{{ $optCur }}" {{ $optCur === $defaultChartCurrency ? 'selected' : '' }}>{{ $optCur }}</option>
+                                        @endforeach
+                                    </select>
+                                </span>
                             </div>
                         </div>
                         <div class="fd-chart" id="amountChartWrap">
@@ -210,7 +306,25 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
             </div>
         </div>
 
-        <div class="col-12 col-lg-4 fd-equal-col">
+        <div class="col-12 col-xxl-4 fd-equal-col d-flex flex-column gap-3">
+            <div class="fd-card fd-amount-summary">
+                <h4 class="fd-amount-summary-title">Amount Summary</h4>
+                <div class="fd-amount-summary-grid">
+                    <div class="fd-amt-stat fd-amt-stat--received">
+                        <span class="fd-amt-stat-label">Total Received</span>
+                        <span class="fd-amt-stat-value">GBP 11.87</span>
+                    </div>
+                    <div class="fd-amt-stat fd-amt-stat--settled">
+                        <span class="fd-amt-stat-label">Total Settled</span>
+                        <span class="fd-amt-stat-value">GBP 0</span>
+                    </div>
+                    <div class="fd-amt-stat fd-amt-stat--balance">
+                        <span class="fd-amt-stat-label">Net Balance</span>
+                        <span class="fd-amt-stat-value">GBP 11.87</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="fd-card h-100 fd-tx-card">
                 <div class="fd-tx-head">
                     <div class="fd-tx-head-left d-flex align-items-center gap-2">
@@ -218,10 +332,6 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                         <span class="fd-tx-count">{{ $totalCount }}</span>
                     </div>
                     <a href="{{ route('showTransactions') }}" class="fd-link">View all ↗</a>
-                </div>
-
-                <div class="fd-search">
-                    <input type="search" id="txSearch" placeholder="Search by checkout ID…" aria-label="Search transactions">
                 </div>
 
                 <div id="txList">
@@ -670,18 +780,6 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         select.addEventListener('change', updateAmount);
         updateAmount();
     });
-
-    const input = document.getElementById('txSearch');
-    const list = document.getElementById('txList');
-    if (input && list) {
-        input.addEventListener('input', () => {
-            const q = input.value.trim().toLowerCase();
-            list.querySelectorAll('.fd-row').forEach(row => {
-                const id = (row.getAttribute('data-id') || '').toLowerCase();
-                row.style.display = (!q || id.includes(q)) ? '' : 'none';
-            });
-        });
-    }
 })();
 </script>
 @endsection

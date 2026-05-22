@@ -2178,6 +2178,37 @@ html * {
     color: var(--fd-select-color);
 }
 
+.fd-select-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.fd-select-wrap .fd-select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 32px !important;
+    cursor: pointer;
+}
+
+.fd-select-wrap::after {
+    content: "";
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #6b7494;
+    transform: translateY(-25%);
+    pointer-events: none;
+}
+
+.fd-root.is-dark .fd-select-wrap::after {
+    border-top-color: #9ba4be;
+}
+
 /* â”€â”€ Transaction list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fd-tx-head {
     padding: 18px;
