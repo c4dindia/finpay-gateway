@@ -351,9 +351,7 @@ $currentPage = 'All Declined Transactions';
             </tr>
             <tr>
               <th scope="row">Status</th>
-              <td class="@if(strtoupper($trans->payment_status) == 'PENDING') text-warning @else text-success @endif">
-                <strong>{{ strtoupper($trans->payment_status) }}</strong>
-              </td>
+              <td class="text-danger"><strong>{{ strtoupper($trans->payment_status) }}</strong></td>
             </tr>
             <tr>
               <th scope="row">Via Service</th>

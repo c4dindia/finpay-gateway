@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alikassa;
+use App\Models\AmountSettlement;
 use App\Models\Company;
 use App\Models\Direpay;
 use App\Models\NiobiPayment;
@@ -45,7 +46,7 @@ class ClientHomeController extends Controller
             return back();   // reload page
         }
 
-        $serviceFilter = session('service','all');
+        $serviceFilter = session('service', 'all');
         $accId = Company::where('user_id', Auth::user()->id)->first()->accountId;
 
         $baseQuery = Transaction::where('account_id', $accId);
@@ -54,31 +55,31 @@ class ClientHomeController extends Controller
         }
 
         $gbpTotal = (clone $baseQuery)->where('currency', 'GBP')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         $usdTotal = (clone $baseQuery)->where('currency', 'USD')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         $usdtTotal = (clone $baseQuery)->where('currency', 'USDT')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         $ethTotal = (clone $baseQuery)->where('currency', 'ETH')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         $eurTotal = (clone $baseQuery)->where('currency', 'EUR')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         $cadTotal = (clone $baseQuery)->where('currency', 'CAD')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         $inrTotal = (clone $baseQuery)->where('currency', 'INR')
-            ->whereIn('payment_status', ['Approved','Completed','Complete','Succeeded','Success','Captured','Paid'])
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
         // -------- CHART DATA --------
@@ -88,7 +89,7 @@ class ClientHomeController extends Controller
             $distinctCurrencies = (clone $baseQuery)
                 ->whereIn('payment_status', $approvedStatuses)
                 ->pluck('currency')
-                ->map(fn ($c) => strtoupper((string) $c))
+                ->map(fn($c) => strtoupper((string) $c))
                 ->unique()
                 ->values();
             $chartCurrency = $distinctCurrencies->contains('INR')
@@ -104,7 +105,7 @@ class ClientHomeController extends Controller
             ->whereIn('payment_status', $approvedStatuses);
 
         if ($serviceFilter != 'all') {
-           $chartQuery = $chartQuery->where('status', $serviceFilter);
+            $chartQuery = $chartQuery->where('status', $serviceFilter);
         }
         $chartData = $chartQuery->groupBy(DB::raw('MONTH(created_at)'))
             ->orderBy(DB::raw('MONTH(created_at)'))
@@ -123,11 +124,14 @@ class ClientHomeController extends Controller
         $totalTransactions = $baseQuery->get();
 
         // -------- JS Transactions --------
-        $totalTransactionsJSbeforeCondition = Transaction::where('account_id', $accId)->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success','Captured','Paid']);
+        $totalTransactionsJSbeforeCondition = Transaction::where('account_id', $accId)->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);
         if ($serviceFilter != 'all') {
-           $totalTransactionsJSbeforeCondition = $totalTransactionsJSbeforeCondition->where('status', $serviceFilter);
+            $totalTransactionsJSbeforeCondition = $totalTransactionsJSbeforeCondition->where('status', $serviceFilter);
         }
         $totalTransactionsJS = $totalTransactionsJSbeforeCondition->get();
+
+        $settledAmount = AmountSettlement::where('accountId', $accId)
+            ->sum(DB::raw('amount + commission'));
 
         return view('client.dashboard', compact(
             'accId',
@@ -142,7 +146,8 @@ class ClientHomeController extends Controller
             'months',
             'amounts',
             'totalTransactions',
-            'totalTransactionsJS'
+            'totalTransactionsJS',
+            'settledAmount'
         ));
     }
 
@@ -218,7 +223,7 @@ class ClientHomeController extends Controller
             ->whereYear('created_at', date("Y"))
             ->where('currency', $currency)
             ->where('account_id', $accId)
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success','Captured','Paid']);
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);
 
         $serviceFilter = session('service', 'all');
 
@@ -284,11 +289,11 @@ class ClientHomeController extends Controller
     public function downloadP12H2HDoc()
     {
         $filepath = public_path('docs/P12_HOST2HOST_API_DOC.docx');
-    
+
         if (!file_exists($filepath)) {
             abort(404, 'File not found');
         }
-    
+
         return response()->download(
             $filepath,
             'P12 Host-2-Host Documentation.docx',
@@ -309,25 +314,25 @@ class ClientHomeController extends Controller
         $accId = Company::where('user_id', Auth::user()->id)->first()->accountId;
 
         // Retrieve payment details for each payment method (P1, P2, P3, P4)
-        $p1detail = POnePaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p2detail = PTwoPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p3detail = PThreePaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p4detail = PFourPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p5detail = PFivePaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p6detail = PSixPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p7detail = PSevenPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p8detail = PEightPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p9detail = PNinePaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p10detail = PTenPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p11detail = PaytoroPayment::where('accountId', $accId)->where('status','=','1')->first();
-        $p12detail = PTwelvePaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p13detail = PThirteenPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p14detail = NiobiPayment::where('accountId', $accId)->where('status','=','1')->first();
-        $p15detail = SmilePay::where('accountId', $accId)->where('status','=','1')->first();
-        $p16detail = TrustitBanking::where('accountId', $accId)->where('status','=','1')->first();
-        $p17detail = Direpay::where('accountId', $accId)->where('status','=','1')->first();
-        $p18detail = PEighteenPaymentMethod::where('accountId', $accId)->where('status','=','1')->first();
-        $p19detail = ValensPay::where('accountId', $accId)->where('status','=','1')->first();
+        $p1detail = POnePaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p2detail = PTwoPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p3detail = PThreePaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p4detail = PFourPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p5detail = PFivePaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p6detail = PSixPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p7detail = PSevenPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p8detail = PEightPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p9detail = PNinePaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p10detail = PTenPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p11detail = PaytoroPayment::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p12detail = PTwelvePaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p13detail = PThirteenPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p14detail = NiobiPayment::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p15detail = SmilePay::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p16detail = TrustitBanking::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p17detail = Direpay::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p18detail = PEighteenPaymentMethod::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p19detail = ValensPay::where('accountId', $accId)->where('status', '=', '1')->first();
         $p20detail = YaspaBanking::where('accountId', $accId)->where('status', '=', '1')->first();
         $p21detail = Alikassa::where('accountId', $accId)->where('status', '=', '1')->first();
         $p22detail = UniqoPay::where('accountId', $accId)->where('status', '=', '1')->first();

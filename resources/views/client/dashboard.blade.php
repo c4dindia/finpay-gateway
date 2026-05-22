@@ -312,15 +312,15 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                 <div class="fd-amount-summary-grid">
                     <div class="fd-amt-stat fd-amt-stat--received">
                         <span class="fd-amt-stat-label">Total Received</span>
-                        <span class="fd-amt-stat-value">GBP 11.87</span>
+                        <span class="fd-amt-stat-value">INR {{ number_format($inrTotal, 2) }}</span>
                     </div>
                     <div class="fd-amt-stat fd-amt-stat--settled">
                         <span class="fd-amt-stat-label">Total Settled</span>
-                        <span class="fd-amt-stat-value">GBP 0</span>
+                        <span class="fd-amt-stat-value">INR {{ number_format($settledAmount, 2) }}</span>
                     </div>
                     <div class="fd-amt-stat fd-amt-stat--balance">
                         <span class="fd-amt-stat-label">Net Balance</span>
-                        <span class="fd-amt-stat-value">GBP 11.87</span>
+                        <span class="fd-amt-stat-value">INR {{ number_format($inrTotal - $settledAmount, 2) }}</span>
                     </div>
                 </div>
             </div>

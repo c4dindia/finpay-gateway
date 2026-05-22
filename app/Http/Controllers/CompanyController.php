@@ -965,7 +965,7 @@ class CompanyController extends Controller
 
         return back()->with('success', 'Merchant Added!');
     }
-    
+
     public function importMerchants(Request $request)
     {
         $request->validate([
@@ -1021,7 +1021,7 @@ class CompanyController extends Controller
         }
         return back()->with('error', 'Merchant Not Found!');
     }
-    
+
     public function deleteUpipayMerchant($id)
     {
         $company = UpiMerchant::where('id', $id)->first();
@@ -1032,13 +1032,13 @@ class CompanyController extends Controller
                 'vpa' => null,
                 'status' => '0'
             ]);
-            
+
             $company->delete();
 
             return back()->with('success', 'Merchant Deleted!');
         }
     }
-    
+
     public function deleteAllUpipayMerchants(Request $request)
     {
         $request->validate([
@@ -1056,7 +1056,7 @@ class CompanyController extends Controller
     public function generateUpipayMerchantLink($merchant_id)
     {
         $merchant = UpiMerchant::where('id', $merchant_id)->first();
-        
+
         $vpaTotalAmount = Transaction::where('card_number', $merchant->vpa)
             ->whereIn('payment_status', ['Pending', 'Completed'])
             ->where('status', 'p23')
@@ -1081,7 +1081,7 @@ class CompanyController extends Controller
             "amount" => "1",
             "note" => 'Test Payment',
             "clientRefId" => $clientRefId,
-            "expiryValue" => "15"
+            "expiryValue" => config('services.p23.payment_expiry_minutes')
         ];
 
         $upiController = app(UpiPaymentController::class);
@@ -1117,7 +1117,7 @@ class CompanyController extends Controller
                     'checkout_id' => $uuid,
                     'type' => $type,
                     'data' => $paymentData,
-                    'expires_at' => now()->addMinutes(15)->timestamp,
+                    'expires_at' => now()->addMinutes(config('services.p23.payment_expiry_minutes'))->timestamp,
                 ]));
 
                 $payUrl = route('p23.payment.page', [
