@@ -550,7 +550,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                     </div>
                     <div class="fd-amt-stat fd-amt-stat--balance">
                         <span class="fd-amt-stat-label">Net Balance</span>
-                        <span class="fd-amt-stat-value">INR {{ number_format($inrTotal - $settledAmount, 2) }}</span>
+                        <span class="fd-amt-stat-value">INR {{ number_format($inrTotal - $settledAmount - $settleAmountCommission, 2) }}</span>
                     </div>
                 </div>
             </div>

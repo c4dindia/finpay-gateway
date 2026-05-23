@@ -250,6 +250,9 @@ Route::get('/p23/payment-status/{checkout_id}', [UpiPaymentController::class, 'g
 Route::get('/p23/payment-status/v2/{checkout_id}', [UpiV2Controller::class, 'getPayinStatus'])->name('p23.payment.status.v2');
 Route::get('/p23/payment-expired/{checkout_id}', [UpiPaymentController::class, 'markPayinExpired'])->name('p23.payment.expired');
 
+Route::get('/p23/payment-link', [UpiPaymentController::class, 'paymentLink'])->name('p23-payment-link');
+Route::post('/p23/generate-payment-link',[UpiPaymentController::class,'generatePaymentLink'])->name('p23-generate-payment-link');
+
 
 Route::get('/inabit-health', function () {
     $response = Illuminate\Support\Facades\Http::get(config('services.inabit.base_url') . '/health');

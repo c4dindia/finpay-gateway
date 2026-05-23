@@ -4,7 +4,7 @@
 <head>
     <title>@yield('title')</title>
     <meta charset="utf-8">
-    <link rel="icon" href="{{ asset('images/Rayzen-Pay-logo.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/fin-group-logo.svg') }}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
@@ -261,6 +261,7 @@
                 'developers-area' => '<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11.25 10L13.75 7.5L11.25 5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.75 5L1.25 7.5L3.75 10" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M9.0625 2.5L5.9375 12.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                 'Transactions' => '<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.5 3.125H2.5C1.80964 3.125 1.25 3.68464 1.25 4.375V10.625C1.25 11.3154 1.80964 11.875 2.5 11.875H12.5C13.1904 11.875 13.75 11.3154 13.75 10.625V4.375C13.75 3.68464 13.1904 3.125 12.5 3.125Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M1.25 6.25H13.75" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>',
                 'Failed-Transactions' => '<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.5 13.75C10.9518 13.75 13.75 10.9518 13.75 7.5C13.75 4.04822 10.9518 1.25 7.5 1.25C4.04822 1.25 1.25 4.04822 1.25 7.5C1.25 10.9518 4.04822 13.75 7.5 13.75Z" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 5V7.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.5 10H7.50625" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+                'Payment-Link' => '<svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.5 3.125V11.875" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/><path d="M3.125 7.5H11.875" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/></svg>',
             ];
         @endphp
 
@@ -296,6 +297,14 @@
                             {!! $figmaNavIcons['Failed-Transactions'] !!}
                         </span>
                         Failed-Transactions
+                    </a>
+                </li>
+                <li class="nav-item @if ($currentPage == 'Payment-Link') active @endif">
+                    <a class="nav-link" href="{{ route('p23-payment-link') }}" target="_blank">
+                        <span class="fd-nav-ico" aria-hidden="true">
+                            {!! $figmaNavIcons['Payment-Link'] !!}
+                        </span>
+                        Payment Link
                     </a>
                 </li>
             </ul>
@@ -355,6 +364,12 @@
                                 {!! $figmaNavIcons['Failed-Transactions'] !!}
                             </span>
                             Failed Transactions</a></li>
+                    <li class="nav-item trans-icon @if ($currentPage == 'Payment-Link') active @endif"><a
+                            class="nav-link" href="{{ route('p23-payment-link') }}" target="_blank">
+                            <span class="fd-nav-ico" aria-hidden="true">
+                                {!! $figmaNavIcons['Payment-Link'] !!}
+                            </span>
+                            Payment Link</a></li>
                 </ul>
 
                 <div class="fd-sidebar-accent" aria-hidden="true">

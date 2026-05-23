@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\UPIPayment;
 use Illuminate\Http\Request;
 use Exception;
@@ -941,6 +942,169 @@ class UpiPaymentController extends Controller
                 Log::warning("UPI: Payout status update failed:- " . $e->getMessage());
                 return back()->with('error', 'Failed to update transaction status.');
             }
+        }
+    }
+
+    public function paymentLink()
+    {
+        $accId = Company::where('user_id', auth()->id())->value('accountId');
+
+        return view('payment.upi.payment-link', compact('accId'));
+    }
+
+    public function generatePaymentLink(Request $request)
+    {
+        $checkacc = UPIPayment::where('accountId', $request->accId)->where('status', '1')->first();
+
+        $validated = $request->validate([
+            'amount'    => 'required|string',
+            'currency' => 'required|in:INR',
+            'description' => 'required|string',
+        ]);
+
+        $vpaTotalAmount = Transaction::where('card_number', $checkacc->vpa)
+            ->whereIn('payment_status', ['Pending', 'Completed'])
+            ->where('status', 'p23')
+            ->sum('amount');
+
+        $vpaLimit = UpiMerchant::where('vpa', $checkacc->vpa)->first()['limitPerDay'] ?? 0;
+
+        if ($vpaLimit > 0 && ($vpaTotalAmount + $validated['amount']) > $vpaLimit) {
+            UpiMerchant::where('vpa', $checkacc->vpa)->update([
+                'status' => '0',
+            ]);
+
+            $newMerchant = UpiMerchant::where('status', '1')
+                ->where('vpa', '!=', $checkacc->vpa)
+                ->inRandomOrder()
+                ->first();
+
+            if ($newMerchant) {
+                $checkacc->mid = $newMerchant->mid;
+                $checkacc->vpa = $newMerchant->vpa;
+            } else {
+                $checkacc->mid = null;
+                $checkacc->vpa = null;
+            }
+            $checkacc->save();
+        }
+
+        if (!$checkacc->mid || !$checkacc->vpa) {
+            Log::warning("No active merchant available for Account ID: " . $request->accId);
+           
+            return response()->json([
+                'success' => false,
+                'error'   => 'Something went wrong, please try again!',
+            ]);
+        }
+
+        do {
+            $uuid = Str::uuid()->toString();
+        } while (Transaction::where('checkout_id', $uuid)->exists());
+
+        $clientRefId = 'Refx' . uniqid();
+        $path = 'https://gatewayeng.azure-api.net/upi/api/1.2/upi/intent/bpm0003/' . $clientRefId;
+
+        $payload = [
+            "merchantVpa" => $checkacc->vpa,
+            "mid" => $checkacc->mid,
+            "amount" => $validated['amount'],
+            "note" => $validated['description'],
+            "clientRefId" => $clientRefId,
+            "expiryValue" => config('services.p23.payment_expiry_minutes')
+        ];
+
+        $accessToken = $this->accessToken();
+        $checksum = $this->generateChecksum($payload);
+
+        if (!$accessToken || !$checksum) {
+            Log::warning("UPI: Payment Link Request Failed:- Unable to get access token or checksum.");
+
+            return response()->json([
+                'success' => false,
+                'error'   => 'Something went wrong, please try again!',
+            ]);
+        }
+
+        $client = new Client();
+        try {
+            $response = $client->post($path, [
+                'headers' => [
+                    'Ocp-Apim-Subscription-Key' => '1ceb19d850404bac9ae417b1ba0a4191',
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'ChannelID' => 'TG2',
+                ],
+                'json' => [
+                    "payload" => $payload,
+                    "checksum" => $checksum
+                ],
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 200 && ($data['errorMsg'] ?? null) === "SUCCESS") {
+                $paymentData = str_replace(' ', '', $data['response']['intentUrl']);
+                $type = 'INTENT';
+
+                $token = Crypt::encryptString(json_encode([
+                    'checkout_id' => $uuid,
+                    'type' => $type,
+                    'data' => $paymentData,
+                    'expires_at' => now()->addMinutes(config('services.p23.payment_expiry_minutes'))->timestamp,
+                ]));
+
+                $payUrl = route('p23.payment.page', [
+                    'checkout_id' => $uuid,
+                ]) . '?' . http_build_query([
+                    'token' => $token,
+                ]);
+
+                $trans = Transaction::where('checkout_id', $uuid)->where('status', 'p23')->first() ?: new Transaction();
+
+                $trans->account_id     = $checkacc->accountId;
+                $trans->currency       = $validated['currency'];
+                $trans->amount         = $validated['amount'];
+                $trans->checkout_id    = $uuid;
+                $trans->payment_id      = $data['txnId'];
+                $trans->payment_status = 'Pending';
+                $trans->description     = $validated['description'];
+                $trans->card_number     = $checkacc->vpa;
+                $trans->status         = 'p23';
+                $trans->customer_details  = $clientRefId;
+                $trans->save();
+
+                Log::info("UPI: Payin Initialization with Checkout ID:- " . $uuid);
+
+                $responseData = [
+                    "success"     => true,
+                    "checkout_id" => $uuid,
+                    "link"        => $payUrl,
+                ];
+
+                return response()->json($responseData, 200);
+            } else {
+                Log::error('UPI: Payment Link Request Failed:- ' . ($data['errorMsg']));
+
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'Failed to create payment link',
+                ], 400);
+            }
+        } catch (RequestException $e) {
+            Log::error('UPI: Payment Link Creation Failed:- ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'error'   => 'Failed to create payment link'
+            ], 500);
+        } catch (Exception $e) {
+            Log::error('UPI: Payment Link Creation Failed:- ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'error'   => 'Failed to create payment link'
+            ], 500);
         }
     }
 }

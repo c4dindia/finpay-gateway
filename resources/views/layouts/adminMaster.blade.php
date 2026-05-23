@@ -4,7 +4,7 @@
 <head>
     <title>@yield('title')</title>
     <meta charset="utf-8">
-    <link rel="icon" href="{{ asset('images/Rayzen-Pay-logo.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/fin-group-logo.svg') }}" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>

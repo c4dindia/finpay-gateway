@@ -144,8 +144,8 @@ class ClientHomeController extends Controller
         }
         $totalTransactionsJS = $totalTransactionsJSbeforeCondition->get();
 
-        $settledAmount = AmountSettlement::where('accountId', $accId)
-            ->sum(DB::raw('amount + commission'));
+        $settledAmount = AmountSettlement::where('accountId', $accId)->sum('amount');
+        $settleAmountCommission = AmountSettlement::where('accountId', $accId)->sum('commission');
 
         return view('client.dashboard', compact(
             'accId',
@@ -161,7 +161,8 @@ class ClientHomeController extends Controller
             'amounts',
             'totalTransactions',
             'totalTransactionsJS',
-            'settledAmount'
+            'settledAmount',
+            'settleAmountCommission'
         ));
     }
 
