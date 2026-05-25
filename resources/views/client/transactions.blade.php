@@ -211,11 +211,13 @@ $currentPage = 'Transactions';
             @endif
 
             <td class="text-nowrap" data-bs-toggle="modal" data-bs-target="#transactionModal-{{ $trans->id }}">{{ \Carbon\Carbon::parse($trans->created_at)->format('d M Y') }}</td>
-            <td class="text-nowrap" data-bs-toggle="modal" data-bs-target="#transactionModal-{{ $trans->id }}">{{ $trans->currency }} {{ number_format($trans->settled_amount ?? $trans->amount, 2) }} </td>
+            <td class="text-nowrap" data-bs-toggle="modal" data-bs-target="#transactionModal-{{ $trans->id }}">
+              @include('client.partials.currency-amount', ['currency' => $trans->currency, 'amount' => $trans->settled_amount ?? $trans->amount])
+            </td>
             <td class="last-column text-nowrap" data-bs-toggle="modal" data-bs-target="#transactionModal-{{ $trans->id }}">
               <small>
                 @if($trans->net_amount)
-                ({{$trans->from_currency}} {{ number_format($trans->net_amount, 2) }} + {{ number_format($trans->fees, 2) }})
+                (<span class="fd-currency-amount">@include('client.partials.currency-icon', ['code' => $trans->from_currency])<span class="fd-currency-amount__value">{{ number_format($trans->net_amount, 2) }}</span></span> + {{ number_format($trans->fees, 2) }})
                 @else
                 -
                 @endif
@@ -254,7 +256,7 @@ $currentPage = 'Transactions';
               </div>
             </div>
             <div class="currency-mob">
-              {{ $trans->currency }} {{ number_format($trans->settled_amount ?? $trans->amount, 2) }}
+              @include('client.partials.currency-amount', ['currency' => $trans->currency, 'amount' => $trans->settled_amount ?? $trans->amount])
             </div>
           </div>
           <div class="d-flex justify-content-between align-items-center">
@@ -413,22 +415,26 @@ $currentPage = 'Transactions';
             @if($trans->status != 'p6')
             <tr>
               <th scope="row">Amount</th>
-              <td>{{ $trans->currency }} {{ number_format($trans->amount, 2) }}</td>
+              <td>@include('client.partials.currency-amount', ['currency' => $trans->currency, 'amount' => $trans->amount])</td>
             </tr>
             @endif
 
             @if($trans->settled_amount)
             <tr>
               <th scope="row">Amount Settled</th>
-              <td>{{ $trans->currency }} {{ number_format($trans->settled_amount, 2) }}</td>
+              <td>@include('client.partials.currency-amount', ['currency' => $trans->currency, 'amount' => $trans->settled_amount])</td>
             </tr>
             @endif
 
             <tr>
               <th scope="row">Net Amount & Fees</th>
-              <td>{{ $trans->net_amount ? $trans->from_currency : '-' }}
-                {{ $trans->net_amount ?: '' }}
-                {{ $trans->fees ? '(+' . $trans->fees . ')' : '' }}
+              <td>
+                @if ($trans->net_amount)
+                  <span class="fd-currency-amount">@include('client.partials.currency-icon', ['code' => $trans->from_currency])<span class="fd-currency-amount__value">{{ number_format($trans->net_amount, 2) }}</span></span>
+                  {{ $trans->fees ? '(+' . number_format($trans->fees, 2) . ')' : '' }}
+                @else
+                  -
+                @endif
               </td>
             </tr>
 

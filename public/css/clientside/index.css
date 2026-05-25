@@ -972,6 +972,28 @@ html * {
     --fd-trans-border: rgba(229, 231, 235, 0.65);
     --fd-trans-muted: var(--fd-muted, #6b7494);
 }
+.fd-currency-amount {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+}
+.fd-currency-icon,
+.fd-currency-symbol {
+    line-height: 1;
+    flex-shrink: 0;
+}
+.fd-currency-symbol {
+    font-weight: 700;
+    font-size: 0.92em;
+}
+.fd-trans-page .trans-table-client .fd-currency-icon {
+    font-size: 0.85em;
+}
+.fd-trans-page .currency-mob .fd-currency-amount {
+    font-size: 1rem;
+    font-weight: 700;
+}
 .fd-trans-panel {
     margin-bottom: 10px !important;
 }

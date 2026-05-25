@@ -498,11 +498,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                                         <div class="fd-kpi-inner">
                                             <div class="fd-kpi-top">
                                                 <div class="fd-kpi-icon">
-                                                    @if (in_array($code, ['INR', 'USD'], true))
-                                                        @include('client.partials.currency-icon', ['code' => $code])
-                                                    @else
-                                                        {{ $kpi['icon'] }}
-                                                    @endif
+                                                    @include('client.partials.currency-icon', ['code' => $code])
                                                 </div>
                                                 <span class="fd-kpi-filter-wrap">
                                                     <select class="fd-kpi-filter" id="kpiRange-{{ $kpi['slug'] }}" aria-label="{{ $code }} time filter" data-currency="{{ $code }}">
@@ -850,15 +846,20 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     const currencyLabelHtml = {
         INR: '<i class="fa-solid fa-indian-rupee-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">INR</span>',
         USD: '<i class="fa-solid fa-dollar-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">USD</span>',
+        GBP: '<i class="fa-solid fa-sterling-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">GBP</span>',
+        EUR: '<i class="fa-solid fa-euro-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">EUR</span>',
+        USDT: '<span class="fd-currency-symbol" aria-hidden="true">₮</span><span class="visually-hidden">USDT</span>',
+        ETH: '<span class="fd-currency-symbol" aria-hidden="true">Ξ</span><span class="visually-hidden">ETH</span>',
+        CAD: '<span class="fd-currency-symbol" aria-hidden="true">C$</span><span class="visually-hidden">CAD</span>',
     };
 
     function renderCurrencyLabel(el, currency) {
         if (!el) return;
         if (currencyLabelHtml[currency]) {
             el.innerHTML = currencyLabelHtml[currency];
-        } else {
-            el.textContent = currency;
+            return;
         }
+        el.innerHTML = '<span class="fd-currency-code">' + currency + '</span>';
     }
 
     function syncChartHeader(currency) {
