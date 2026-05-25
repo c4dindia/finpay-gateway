@@ -30,74 +30,16 @@ $currentPage = 'Failed-Transactions';
 @endsection
 
 @section('page-content')
-<div class="row mx-0 mx-lg-4 mt-2">
-  <div class="col-12 mb-4 ps-lg-2 pe-lg-0">
-    <div class="d-flex flex-column flex-xxl-row align-items-center justify-content-end">
-      <div class="d-flex flex-column flex-xxl-row align-items-center gap-2 gap-xxl-3">
-        <div class="input-group">
-          <span class="trans-search-icon d-flex align-items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path
-                d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z"
-                stroke="#0050B1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M21.0004 20.9999L16.6504 16.6499" stroke="#0050B1" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </span>
-          <form action="{{ route('showFailed-Transactions') }}" method="GET"
-            class="d-flex flex-column flex-xxl-row align-items-center gap-2 gap-xxl-3">
-            <div class="input-group d-flex gap-2 flex-nowrap justify-content-center">
-              <input type="text" name="q" class="form-control trans-search ps-md-5 rounded-4 w-100"
-                placeholder="Search (txn Id, checkout Id)" value="{{ request('q') }}">
-              <div class="d-flex gap-2 justify-content-center">
-                <button type="button" onclick="window.location='{{ route('showFailed-Transactions') }}'"
-                  class="btn btn-outline-primary rounded-4 {{ request('q') == '' ? 'd-none' : 'd-block' }}">
-                  Cancel
-                </button>
-                <button id="searchbtn" class="btn btn-outline-primary trans-search-btn rounded-4" type="submit"
-                  disabled>
-                  Search
-                </button>
-              </div>
-            </div>
-            <div>
-              @php $selectedName = request('name', 'total'); @endphp
-              <select name="name" id="name" class="form-select trans-select" onchange="this.form.submit()" required>
-                <option value="total" {{ $selectedName === 'total' ? 'selected' : '' }}>Total</option>
-                <option value="thisMonth" {{ $selectedName === 'thisMonth' ? 'selected' : '' }}>This month</option>
-                <option value="lastMonth" {{ $selectedName === 'lastMonth' ? 'selected' : '' }}>Last month</option>
-                <option value="lastFewMonths" {{ $selectedName === 'lastFewMonths' ? 'selected' : '' }}>Last 3 month
-                </option>
-              </select>
-            </div>
-            <div class="">
-              @php
-              $company = Auth::user()->company()->first();
-              $selectedService = request('service', 'all');
-              $services = [
-              'p12' => ['label' => '2D/3D', 'model' => \App\Models\PTwelvePaymentMethod::class],
-              'p17' => ['label' => 'P-17 Dire', 'model' => \App\Models\Direpay::class],
-              'p22' => ['label' => 'P-22 Uniqo', 'model' => \App\Models\UniqoPay::class],
-              'p23' => ['label' => 'P-23 UPI', 'model' => \App\Models\UPIPayment::class],
-              ];
-              @endphp
-              <select name="service" class="form-select trans-select" onchange="this.form.submit()">
-                <option value="all" {{ $selectedService === 'all' ? 'selected' : '' }}>All Services</option>
-                @foreach($services as $key => $service)
-                @if($company && $service['model']::where('company_id', $company->id)->where('status', 1)->exists())
-                <option value="{{ $key }}" {{ $selectedService === $key ? 'selected' : '' }}>
-                  {{ $service['label'] }}
-                </option>
-                @endif
-                @endforeach
-              </select>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-12 summary-card2 summary-card-transactions-client d-none d-lg-block">
+<div class="fd-trans-page fd-trans-page--failed">
+<div class="row mx-0 mx-lg-4 mt-0">
+  @include('client.partials.transactions-panel', [
+      'isFailedPage' => true,
+      'showDownload' => false,
+      'formAction' => route('showFailed-Transactions'),
+      'clearUrl' => route('showFailed-Transactions'),
+  ])
+
+  <div class="col-md-12 summary-card2 summary-card-transactions-client fd-trans-table-card d-none d-lg-block">
     <!-- <div class="d-flex justify-content-between align-items-center pb-2">
                                         <h4 class="text-uppercase">Failed-Transactions</h4>
                                        <form action="{{ route('showFailed-Transactions') }}" method="GET" id="myForm">
@@ -125,8 +67,8 @@ $currentPage = 'Failed-Transactions';
         </thead>
         <tbody class="">
           @if (count($transactions) == 0)
-          <tr class="">
-            <td scope="row" colspan="7" class="text-center">No Transactions !</td>
+          <tr class="trans-table-empty">
+            <td scope="row" colspan="7" class="text-center border-0">No failed transactions found</td>
           </tr>
           @else
           @foreach ($transactions as $trans)
@@ -272,15 +214,7 @@ $currentPage = 'Failed-Transactions';
 
 
           @endforeach
-          @if (count($transactions) < 15)
-            @for ($i=0; $i < 15 - count($transactions); $i++)
-            <tr class="no-hover">
-            <td colspan="7" style="{{ $i == 0 ? 'border:0;border-top:1px solid #B8B8B8' : 'border: none;' }}">&nbsp;
-            </td> {{-- assuming your table has 7 columns --}}
-            </tr>
-            @endfor
-            @endif
-            @endif
+          @endif
 
         </tbody>
 
@@ -422,6 +356,7 @@ $currentPage = 'Failed-Transactions';
     </div>
   </div>
   @endif
+</div>
 </div>
 
 {{-- Modal for transaction details --}}
