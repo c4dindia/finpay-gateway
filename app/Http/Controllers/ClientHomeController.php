@@ -89,7 +89,7 @@ class ClientHomeController extends Controller
 
         $chartCurrencyOptions = $totalTransactions
             ->pluck('currency')
-            ->map(fn ($c) => strtoupper(trim((string) $c)))
+            ->map(fn($c) => strtoupper(trim((string) $c)))
             ->filter()
             ->unique()
             ->values();
@@ -99,7 +99,7 @@ class ClientHomeController extends Controller
             $approvedCurrencies = $totalTransactions
                 ->whereIn('payment_status', $approvedStatuses)
                 ->pluck('currency')
-                ->map(fn ($c) => strtoupper(trim((string) $c)))
+                ->map(fn($c) => strtoupper(trim((string) $c)))
                 ->filter()
                 ->unique()
                 ->values();
@@ -144,8 +144,13 @@ class ClientHomeController extends Controller
         }
         $totalTransactionsJS = $totalTransactionsJSbeforeCondition->get();
 
-        $settledAmount = AmountSettlement::where('accountId', $accId)->sum('amount');
-        $settleAmountCommission = AmountSettlement::where('accountId', $accId)->sum('commission');
+        if ($serviceFilter == 'all') {
+            $settledAmount = AmountSettlement::where('accountId', $accId)->sum('amount');
+            $settleAmountCommission = AmountSettlement::where('accountId', $accId)->sum('commission');
+        } else {
+            $settledAmount = AmountSettlement::where('accountId', $accId)->where('payment_service', $serviceFilter)->sum('amount');
+            $settleAmountCommission = AmountSettlement::where('accountId', $accId)->where('payment_service', $serviceFilter)->sum('commission');
+        }
 
         return view('client.dashboard', compact(
             'accId',
