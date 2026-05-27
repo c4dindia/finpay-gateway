@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use GuzzleHttp\Exception\RequestException;
 use App\Models\Transaction;
 use App\Models\UpiMerchant;
+use App\Http\Controllers\UpiV2Controller;
 use Illuminate\Support\Facades\Crypt;
 
 class UpiPaymentController extends Controller
@@ -662,17 +663,20 @@ class UpiPaymentController extends Controller
         }
 
         $trans->payment_id     = $request->input('utrNo');
-        $trans->description     = 'Payout completed: ' . $request->input('orderId');
 
         $status = $request->input('status');
 
         if (strtolower($status) === 'success') {
             $trans->payment_status = 'Completed';
+            $trans->description     = 'Payout completed: ' . $request->input('orderId');
+        } elseif (strtolower($status) === 'failed') {
+            $trans->payment_status = 'Failed';
+            $trans->description     = 'Payout failed: ' . $request->input('orderId');
         } else {
             $trans->payment_status = ucfirst(strtolower($status));
         }
 
-        $trans->status         = 'p23';
+        $trans->status = 'p23';
 
         $trans->save();
 
@@ -825,7 +829,11 @@ class UpiPaymentController extends Controller
         $trans = Transaction::where('checkout_id', $checkout_id)->where('status', 'p23')->first();
         $client = new Client();
 
-        if ($trans && $trans->payment_id) {
+        if (!empty($trans->card_number) && !str_contains((string) $trans->card_number, '@')) {
+            return app(UpiV2Controller::class)->updateP23TrxnStatus($checkout_id);
+        }
+
+        if ($trans->payment_id && !empty($trans->card_number) && str_contains((string) $trans->card_number, '@')) {
             $path = $this->baseUrl . "/1.0/checktxndetails";
 
             $payload = [
@@ -957,9 +965,10 @@ class UpiPaymentController extends Controller
         $checkacc = UPIPayment::where('accountId', $request->accId)->where('status', '1')->first();
 
         $validated = $request->validate([
-            'amount'    => 'required|string',
+            'amount' => 'required|numeric|min:10',
             'currency' => 'required|in:INR',
             'description' => 'required|string',
+            'url' => 'required|url',
         ]);
 
         $vpaTotalAmount = Transaction::where('card_number', $checkacc->vpa)
@@ -991,7 +1000,7 @@ class UpiPaymentController extends Controller
 
         if (!$checkacc->mid || !$checkacc->vpa) {
             Log::warning("No active merchant available for Account ID: " . $request->accId);
-           
+
             return response()->json([
                 'success' => false,
                 'error'   => 'Something went wrong, please try again!',
@@ -1003,7 +1012,7 @@ class UpiPaymentController extends Controller
         } while (Transaction::where('checkout_id', $uuid)->exists());
 
         $clientRefId = 'Refx' . uniqid();
-        $path = 'https://gatewayeng.azure-api.net/upi/api/1.2/upi/intent/bpm0003/' . $clientRefId;
+        $path = $this->baseUrl . "/1.2/upi/intent/" . $this->bpmidentifier . "/" . $clientRefId;
 
         $payload = [
             "merchantVpa" => $checkacc->vpa,
@@ -1030,7 +1039,7 @@ class UpiPaymentController extends Controller
         try {
             $response = $client->post($path, [
                 'headers' => [
-                    'Ocp-Apim-Subscription-Key' => '1ceb19d850404bac9ae417b1ba0a4191',
+                    'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
                     'Authorization' => 'Bearer ' . $accessToken,
                     'ChannelID' => 'TG2',
                 ],

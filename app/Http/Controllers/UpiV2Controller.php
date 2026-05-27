@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
 use App\Models\UPIPayment;
 use Illuminate\Http\Request;
 use Exception;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Crypt;
 
 class UpiV2Controller extends Controller
 {
-    protected $baseUrl = "https://payment-gateway.in/upi/api/2.12"; 
+    protected $baseUrl = "https://payment-gateway.in/upi/api/2.12";
     protected $subscriptionKey = "1ceb19d850404bac9ae417b1ba0a4191";
     protected $bpmidentifier = "bpm0003";
     protected $checkSum = "92992";
@@ -59,7 +60,6 @@ class UpiV2Controller extends Controller
 
         if ($validated['method'] === 'QR') {
             $payload = [
-                "merchantVpa"   => $checkacc->vpa,
                 "merchantName"  => $this->merchantName,
                 "mid"           => $checkacc->midv2,
                 "minAmount"     => $validated['amount'],
@@ -75,7 +75,6 @@ class UpiV2Controller extends Controller
             $path = $this->baseUrl . "/upi/generateqr/" . $this->bpmidentifier . "/" . $clientRefId;
         } else {
             $payload = [
-                "merchantVpa" => $checkacc->vpa,
                 "merchantName" => $this->merchantName,      //added
                 "mid" => $checkacc->midv2,
                 "amount" => $validated['amount'],
@@ -137,7 +136,7 @@ class UpiV2Controller extends Controller
                 $trans->payment_id     = $data['response']['txnId'];
                 $trans->payment_status = 'Pending';
                 $trans->description    = $validated['description'];
-                // $trans->card_number    = $checkacc->vpa;
+                $trans->card_number    = $checkacc->midv2;
                 $trans->status         = 'p23';
                 $trans->customer_details  = $clientRefId;
 
@@ -207,7 +206,6 @@ class UpiV2Controller extends Controller
 
         if ($method === 'QR') {
             $payload = [
-                "merchantVpa"   => $checkacc->vpa,
                 "merchantName"  => $this->merchantName,
                 "mid"           => $checkacc->midv2,
                 "minAmount"     => $amount,
@@ -223,7 +221,6 @@ class UpiV2Controller extends Controller
             $path = $this->baseUrl . "/upi/generateqr/" . $this->bpmidentifier . "/" . $clientRefId;
         } else {
             $payload = [
-                "merchantVpa" => $checkacc->vpa,
                 "merchantName" => $this->merchantName,      //added
                 "mid" => $checkacc->midv2,
                 "amount" => $amount,
@@ -285,7 +282,7 @@ class UpiV2Controller extends Controller
                 $trans->payment_id      = $data['response']['txnId'];
                 $trans->payment_status = 'Pending';
                 $trans->description     = $description;
-                $trans->card_number     = $checkacc->vpa;
+                $trans->card_number    = $checkacc->midv2;
                 $trans->status         = 'p23';
                 $trans->customer_details  = $clientRefId;
 
@@ -435,62 +432,183 @@ class UpiV2Controller extends Controller
 
         $checkaccId = UPIPayment::where('accountId', $trans->account_id)->first();
         if ($checkaccId == null) {
-            return back()->with('error','Unauthorized Account Id');
+            return back()->with('error', 'Unauthorized Account Id');
         }
 
-            $path = $this->baseUrl . "/checktxndetails";
+        $path = $this->baseUrl . "/checktxndetails";
 
-            $payload = [
-                "txnid" => $trans->payment_id,
-                "clientrefid" => $trans->customer_details,
-                "mid"   => $checkaccId->midv2
-            ];
+        $payload = [
+            "txnid" => $trans->payment_id,
+            "clientrefid" => $trans->customer_details,
+            "mid"   => $checkaccId->midv2
+        ];
 
-            try {
-                $response = $client->post($path, [
-                    'headers' => [
-                        'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
-                        'Content-Type' => 'application/json',
-                    ],
-                    'json' => [
-                        "payload" => [
-                            "txnid" => $trans->payment_id,
-                            "clientrefid" => $trans->customer_details,
-                        ],
-                    ],
-                ]);
-                $data = json_decode($response->getBody(), true);
-                $statusCode = $response->getStatusCode();
+        try {
+            $response = $client->post($path, [
+                'headers' => [
+                    'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    "payload" => $payload,
+                ],
+            ]);
+            $data = json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
 
-                if ($statusCode === 200 && ($data['errorMsg'] ?? null) === "SUCCESS") {
-                    $status = $data['response']['txnStatus'];
+            if ($statusCode === 200 && ($data['errorMsg'] ?? null) === "SUCCESS") {
+                $status = $data['response']['txnStatus'];
 
-                    if (strtolower($status) === 'success') {
-                        $trans->payment_status = 'Completed';
-                    } elseif (strtolower($status) === 'generated') {
-                        $trans->payment_status = 'Pending';
-                    } else {
-                        $trans->payment_status = ucfirst(strtolower($status));
-                    }
-
-                    $createdAt = $trans->created_at->timestamp;
-                    $expiresAt = $createdAt + (config('services.p23.payment_expiry_minutes') * 60); // expiry minutes
-                    $isExpired = time() > $expiresAt;
-
-                    if ($isExpired && $trans->payment_status == 'Pending') {
-                        $trans->payment_status = 'Expired';
-                    }
-
-                    $trans->save();
-
-                    return back()->with('success', 'Transaction status updated successfully.');
+                if (strtolower($status) === 'success') {
+                    $trans->payment_status = 'Completed';
+                } elseif (strtolower($status) === 'generated') {
+                    $trans->payment_status = 'Pending';
                 } else {
-                    Log::error('UPI: v2 Transaction Status Request Failed:- ', $data);
-                    return back()->with('error', 'Failed to update transaction status.');
+                    $trans->payment_status = ucfirst(strtolower($status));
                 }
-            } catch (RequestException $e) {
-                Log::warning("UPI: v2 Transaction Status Update Failed: " . $e->getMessage());
+
+                $createdAt = $trans->created_at->timestamp;
+                $expiresAt = $createdAt + (config('services.p23.payment_expiry_minutes') * 60); // expiry minutes
+                $isExpired = time() > $expiresAt;
+
+                if ($isExpired && $trans->payment_status == 'Pending') {
+                    $trans->payment_status = 'Expired';
+                }
+
+                $trans->save();
+
+                return back()->with('success', 'Transaction status updated successfully.');
+            } else {
+                Log::error('UPI: v2 Transaction Status Request Failed:- ', $data);
                 return back()->with('error', 'Failed to update transaction status.');
             }
+        } catch (RequestException $e) {
+            Log::warning("UPI: v2 Transaction Status Update Failed: " . $e->getMessage());
+            return back()->with('error', 'Failed to update transaction status.');
+        }
+    }
+
+    public function paymentLink()
+    {
+        $accId = Company::where('user_id', auth()->id())->value('accountId');
+
+        return view('payment.upi.payment-link-v2', compact('accId'));
+    }
+
+    public function generatePaymentLink(Request $request)
+    {
+        $checkacc = UPIPayment::where('accountId', $request->accId)->where('status', '1')->first();
+
+        $validated = $request->validate([
+            'amount'    => 'required|string',
+            'currency' => 'required|in:INR',
+            'description' => 'required|string',
+            'phone' => 'required|digits:10',
+            'url' => 'required|url',
+        ]);
+
+        do {
+            $uuid = Str::uuid()->toString();
+        } while (Transaction::where('checkout_id', $uuid)->exists());
+
+        $clientRefId = 'Refx' . uniqid();
+        $midv2 = $checkacc->midv2;
+
+        if (!$midv2) {
+            Log::error("UPI: Merchant V2 ID not found");
+            return response()->json(['error' => 'Something went wrong'], 400);
+        }
+
+        $path = $this->baseUrl . "/upi/intent/" . $this->bpmidentifier . "/" . $clientRefId;
+
+        $payload = [
+            "merchantName" => $this->merchantName,      //added
+            "mid" => $checkacc->midv2,
+            "amount" => $validated['amount'],
+            "note" => $validated['description'],
+            "clientRefId" => $clientRefId,
+            "expiryValue" => config('services.p23.payment_expiry_minutes'),
+            "udf1"        => $validated['phone']   //mobile no.
+        ];
+
+        $client = new Client();
+        try {
+            $response = $client->post($path, [
+                'headers' => [
+                    'Ocp-Apim-Subscription-Key' => $this->subscriptionKey,
+                    'ChannelID' => $this->channelId,
+                ],
+                'json' => [
+                    "payload" => $payload
+                ],
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+            $statusCode = $response->getStatusCode();
+
+            if ($statusCode === 200 && ($data['errorMsg'] ?? null) === "SUCCESS") {
+                $paymentData = str_replace(' ', '', $data['response']['intentUrl']);
+                $type = 'INTENT';
+
+                $token = Crypt::encryptString(json_encode([
+                    'checkout_id' => $uuid,
+                    'type' => $type,
+                    'mobile' => $validated['phone'],
+                    'data' => $paymentData,
+                    'expires_at' => now()->addMinutes(config('services.p23.payment_expiry_minutes'))->timestamp,
+                ]));
+
+                $payUrl = route('p23.payment.page-v2', [
+                    'checkout_id' => $uuid,
+                ]) . '?' . http_build_query([
+                    'token' => $token,
+                ]);
+
+                $trans = Transaction::where('checkout_id', $uuid)->where('status', 'p23')->first() ?: new Transaction();
+
+                $trans->account_id     = $checkacc->accountId;
+                $trans->currency       = $validated['currency'];
+                $trans->amount         = $validated['amount'];
+                $trans->checkout_id    = $uuid;
+                $trans->payment_id      = $data['response']['txnId'];
+                $trans->payment_status = 'Pending';
+                $trans->description     = $validated['description'];
+                $trans->card_number    = $checkacc->midv2;
+                $trans->status         = 'p23';
+                $trans->customer_details  = $clientRefId;
+                $trans->save();
+
+                Log::info("UPI: v2 Payin Initialization with Checkout ID:- " . $uuid);
+
+                $responseData = [
+                    "success"     => true,
+                    "checkout_id" => $uuid,
+                    "link"        => $payUrl,
+                ];
+
+                return response()->json($responseData, 200);
+            } else {
+                Log::error('UPI: v2 Payment Link Request Failed:- ' . ($data['errorMsg']));
+
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'Failed to create payment link',
+                ], 400);
+            }
+        } catch (RequestException $e) {
+            Log::error('UPI: v2 Payment Link Creation Failed:- ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'error'   => 'Failed to create payment link'
+            ], 500);
+        } catch (Exception $e) {
+            Log::error('UPI: v2 Payment Link Creation Failed:- ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'error'   => 'Failed to create payment link'
+            ], 500);
+        }
     }
 }

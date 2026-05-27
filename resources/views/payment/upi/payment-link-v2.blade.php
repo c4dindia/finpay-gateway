@@ -2,7 +2,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>UPI Payment Link</title>
+    <title>UPI Payment V2 Link</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="{{ asset('images/fin-group-logo.svg') }}" sizes="any">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -26,17 +26,23 @@
             box-sizing: border-box;
         }
 
-        body {
+        html{
+             background: radial-gradient(ellipse 900px 700px at 75% -5%, rgba(17, 169, 255, .10), transparent),
+                radial-gradient(ellipse 800px 600px at 10% 105%, rgba(47, 191, 113, .10), transparent),
+                #f4f8fc;
+        }
+
+        .main {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            min-height: 100dvh;
             display: flex;
             justify-content: center;
+            align-items: center;
             margin: 0;
-            background:
-                radial-gradient(ellipse 900px 700px at 75% -5%, rgba(17, 169, 255, .10), transparent),
+            background: radial-gradient(ellipse 900px 700px at 75% -5%, rgba(17, 169, 255, .10), transparent),
                 radial-gradient(ellipse 800px 600px at 10% 105%, rgba(47, 191, 113, .10), transparent),
                 #f4f8fc;
             color: var(--text-primary);
+            
         }
 
         .page-wrap {
@@ -100,6 +106,7 @@
                 0 1px 2px rgba(0, 0, 0, .04),
                 0 8px 32px rgba(17, 169, 255, .08);
             padding: 2rem;
+            margin-bottom: 2rem;
             transition: box-shadow .3s;
         }
 
@@ -537,111 +544,121 @@
 
 <body>
 
-    <div class="page-wrap">
-        <div class="logo-wrap">
-            <img src="{{ asset('images/fin-group-logo.svg') }}" alt="FinPay" class="logo-img" loading="eager" decoding="async">
+    <div class="main">
+        <div class="page-wrap">
+            <div class="logo-wrap">
+                <img src="{{ asset('images/fin-group-logo.svg') }}" alt="FinPay" class="logo-img" loading="eager" decoding="async">
+            </div>
+
+            <h1 class="page-title">Payment Link Generator</h1>
+            <p class="page-subtitle">Create a secure, shareable payment link in seconds.</p>
+
+            <div class="main-card">
+                <div class="card-header-row">
+                    <div class="card-icon">
+                        <i class="bi bi-link-45deg"></i>
+                    </div>
+                    <div class="card-header-text">
+                        <h2>UPI Payment V2 Link</h2>
+                        <p>One link to share by SMS, email, or chat.
+                        </p>
+                    </div>
+                </div>
+
+                <form id="generate-form" method="POST">
+                    @csrf
+
+                    <input type="hidden" name="accId" id="accId" value="{{ $accId }}">
+                    <div class="d-flex gap-3 input-row">
+                        <div class="input-group-custom flex-fill">
+                            <label for="input-currency">Currency</label>
+                            <div class="input-wrap">
+                                <select name="currency" id="input-currency" required>
+                                    <option value="" disabled selected>Select currency</option>
+                                    <option value="INR">INR</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 input-row">
+                        <div class="input-group-custom flex-fill">
+                            <label for="input-amount">Amount</label>
+                            <div class="input-wrap">
+                                <input type="number" name="amount" id="input-amount" placeholder="0.00" min="10" step="any" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 input-row">
+                        <div class="input-group-custom flex-fill">
+                            <label for="input-amount">Description</label>
+                            <div class="input-wrap">
+                                <input type="text" name="description" id="description" placeholder="Enter description" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 input-row">
+                        <div class="input-group-custom flex-fill">
+                            <label for="input-amount">Phone</label>
+                            <div class="input-wrap">
+                                <input type="number" name="phone" id="phone" placeholder="Enter phone" required maxlength="10"
+                                    minlength="10"
+                                    pattern="[0-9]{10}"
+                                    inputmode="numeric"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 input-row">
+                        <div class="input-group-custom flex-fill">
+                            <label for="input-amount">URL</label>
+                            <div class="input-wrap">
+                                <input type="url" name="url" id="url" placeholder="https://" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="generate-link" class="gen-btn" disabled>
+                        <i class="bi bi-magic me-2"></i>Generate Link
+                    </button>
+                </form>
+
+                <div id="loading-spinner" class="loader-wrap d-none" aria-live="polite">
+                    <div class="loader-ring">
+                        <div class="loader-pulse"></div>
+                    </div>
+                    <span class="loader-text">Generating your link<span class="loader-dots"></span></span>
+                </div>
+
+                <div id="link-section" class="results-wrap d-none">
+                    <div class="result-card result-card--pay">
+                        <div class="result-header">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Generated Link</span>
+                        </div>
+                        <input type="text" id="payment-link" class="link-input" readonly value="">
+                        <div class="link-actions">
+                            <a href="" target="_blank" class="link-action-btn" id="open-link">
+                                <i class="bi bi-box-arrow-up-right"></i>Open
+                            </a>
+                            <button type="button" class="link-action-btn copy-btn" data-target="payment-link">
+                                <i class="bi bi-clipboard"></i>Copy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="error-box" class="err-box d-none" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span id="error-msg"></span>
+                </div>
+            </div>
+
         </div>
-
-        <h1 class="page-title">Payment Link Generator</h1>
-        <p class="page-subtitle">Create a secure, shareable payment link in seconds.</p>
-
-        <div class="main-card">
-            <div class="card-header-row">
-                <div class="card-icon">
-                    <i class="bi bi-link-45deg"></i>
-                </div>
-                <div class="card-header-text">
-                    <h2>UPI Payment Link</h2>
-                    <p>One link to share by SMS, email, or chat.
-                    </p>
-                </div>
-            </div>
-
-            <form id="generate-form" method="POST">
-                @csrf
-
-                <input type="hidden" name="accId" id="accId" value="{{ $accId }}">
-                <div class="d-flex gap-3 input-row">
-                    <div class="input-group-custom flex-fill">
-                        <label for="input-currency">Currency</label>
-                        <div class="input-wrap">
-                            <select name="currency" id="input-currency" required>
-                                <option value="" disabled selected>Select currency</option>
-                                <option value="INR">INR</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-3 input-row">
-                    <div class="input-group-custom flex-fill">
-                        <label for="input-amount">Amount</label>
-                        <div class="input-wrap">
-                            <input type="number" name="amount" id="input-amount" placeholder="0.00" min="0" step="any" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-3 input-row">
-                    <div class="input-group-custom flex-fill">
-                        <label for="input-amount">Description</label>
-                        <div class="input-wrap">
-                            <input type="text" name="description" id="description" placeholder="Enter description" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-3 input-row">
-                    <div class="input-group-custom flex-fill">
-                        <label for="input-amount">URL</label>
-                        <div class="input-wrap">
-                            <input type="url" name="url" id="url" placeholder="https://" required>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="submit" id="generate-link" class="gen-btn" disabled>
-                    <i class="bi bi-magic me-2"></i>Generate Link
-                </button>
-            </form>
-
-            <div id="loading-spinner" class="loader-wrap d-none" aria-live="polite">
-                <div class="loader-ring">
-                    <div class="loader-pulse"></div>
-                </div>
-                <span class="loader-text">Generating your link<span class="loader-dots"></span></span>
-            </div>
-
-            <div id="link-section" class="results-wrap d-none">
-                <div class="result-card result-card--pay">
-                    <div class="result-header">
-                        <i class="bi bi-check-circle-fill"></i>
-                        <span>Generated Link</span>
-                    </div>
-                    <input type="text" id="payment-link" class="link-input" readonly value="">
-                    <div class="link-actions">
-                        <a href="" target="_blank" class="link-action-btn" id="open-link">
-                            <i class="bi bi-box-arrow-up-right"></i>Open
-                        </a>
-                        <button type="button" class="link-action-btn copy-btn" data-target="payment-link">
-                            <i class="bi bi-clipboard"></i>Copy
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="error-box" class="err-box d-none" role="alert">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span id="error-msg"></span>
-            </div>
-        </div>
-
-
-
-
-
     </div>
-
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -652,6 +669,7 @@
             var $amount = $('#input-amount');
             var $currency = $('#input-currency');
             var description = $('#description');
+            var phone = $('#phone');
             var url = $('#url');
             var $form = $('#generate-form');
             var $spinner = $('#loading-spinner');
@@ -659,12 +677,15 @@
             var $errorMsg = $('#error-msg');
 
             function checkInputs() {
-                var hasAmount = $amount.val().trim() !== '';
+                var amountValue = parseFloat($amount.val());
+                var hasAmount = !isNaN(amountValue) && amountValue >= 10;
                 var hasCurrency = $currency.val() !== null && $currency.val().trim() !== '';
                 var hasDescription = description.val().trim() !== '';
+                var phoneValue = phone.val().trim();
+                var hasPhone = /^[0-9]{10}$/.test(phoneValue);
                 var hasUrl = url.val().trim() !== '' && url[0].checkValidity();
 
-                $btn.prop('disabled', !(hasAmount && hasCurrency && hasDescription && hasUrl));
+                $btn.prop('disabled', !(hasAmount && hasCurrency && hasDescription && hasPhone && hasUrl));
             }
 
             function clearError() {
@@ -675,6 +696,10 @@
             $amount.on('input', checkInputs);
             $currency.on('change', checkInputs);
             description.on('input', checkInputs);
+            phone.on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+                checkInputs();
+            });
             url.on('input', checkInputs);
 
             $form.on('submit', function(e) {
@@ -693,10 +718,11 @@
                 var currency = $currency.val().trim();
                 var accountId = $('#accId').val().trim();
                 var description = $('#description').val().trim();
+                var phone = $('#phone').val().trim();
                 var url = $('#url').val().trim();
 
                 $.ajax({
-                    url: '/p23/generate-payment-link',
+                    url: '/p23/generate-payment-link/v2',
                     method: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -704,6 +730,7 @@
                         currency: currency,
                         accId: accountId,
                         description: description,
+                        phone: phone,
                         url: url
                     },
                     success: function(response) {
