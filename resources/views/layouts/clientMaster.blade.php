@@ -95,9 +95,15 @@
                 s.textContent = '::view-transition{background-color:' + (dark ? '#07080f' : '#ecf0fb') + '}';
                 document.head.appendChild(s);
             } catch (e) { }
-            function shouldSkipForServiceSwitch(target) {
+            function markSkipViewTransition() {
+                try { sessionStorage.setItem('fdSkipVT', '1'); } catch (_) { }
+            }
+
+            function shouldSkipInstantNav(target) {
                 try {
                     if (!target || !target.closest) return false;
+                    if (target.closest('.fd-trans-filters')) return true;
+                    if (target.closest('form.fd-trans-filters')) return true;
                     var tab = target.closest('.fd-tabs .fd-tab');
                     var a = target.closest('a[href]');
                     var href = a ? a.getAttribute('href') : '';
@@ -105,34 +111,35 @@
                 } catch (_) { return false; }
             }
 
-            // Mark very early so the old-page capture can skip transitions.
-            document.addEventListener('pointerdown', function (ev) {
-                if (!shouldSkipForServiceSwitch(ev.target)) return;
-                try { sessionStorage.setItem('fdSkipVT', '1'); } catch (_) { }
-            }, true);
-
-            // Keyboard activation support (Enter/Space on focused link/button).
-            document.addEventListener('keydown', function (ev) {
-                if (ev.key !== 'Enter' && ev.key !== ' ') return;
-                if (!shouldSkipForServiceSwitch(ev.target)) return;
-                try { sessionStorage.setItem('fdSkipVT', '1'); } catch (_) { }
-            }, true);
-
-      
-            document.addEventListener('pagereveal', function (e) {
-                if (!e.viewTransition) return;
+            function consumeSkipViewTransition() {
                 try {
-                    document.documentElement.classList.remove('theme-preload');
+                    var skip = sessionStorage.getItem('fdSkipVT') === '1';
                     sessionStorage.removeItem('fdSkipVT');
-                    e.viewTransition.skipTransition();
-                } catch (_) { }
+                    return skip;
+                } catch (_) { return false; }
+            }
+
+            // Cross-document view-transitions cause a brief crossfade on reload that reads
+            // as a "flash" on form submissions / filter changes. Skip unconditionally on
+            // both ends of the navigation — saves the snapshot capture/animation entirely.
+            window.addEventListener('pageswap', function (e) {
+                consumeSkipViewTransition();
+                if (!e.viewTransition) return;
+                try { e.viewTransition.skipTransition(); } catch (_) { }
             });
 
-            // Backup marker on click as an extra guard.
-            document.addEventListener('click', function (ev) {
+            document.addEventListener('pagereveal', function (e) {
+                try { document.documentElement.classList.remove('theme-preload'); } catch (_) { }
+                if (!e.viewTransition) return;
+                try { e.viewTransition.skipTransition(); } catch (_) { }
+            });
+
+            // Kept for legacy callers; current handlers ignore the flag.
+            document.addEventListener('submit', function (ev) {
                 try {
-                    if (shouldSkipForServiceSwitch(ev.target)) {
-                        sessionStorage.setItem('fdSkipVT', '1');
+                    var form = ev.target;
+                    if (form && form.classList && form.classList.contains('fd-trans-filters')) {
+                        markSkipViewTransition();
                     }
                 } catch (_) { }
             }, true);

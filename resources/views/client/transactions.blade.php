@@ -513,21 +513,6 @@ $currentPage = 'Transactions';
 </div>
 @endforeach
 
-<script>
-  const input = document.querySelector('input[name=q]');
-  const btn = document.querySelector('#searchbtn');
-
-  // Function to update button state
-  function updateBtnState() {
-    btn.disabled = (input.value.trim() === '');
-  }
-
-  // 1. Run once on page load (for persisted values)
-  updateBtnState();
-
-  // 2. Listen forever for any input changes
-  input.addEventListener('input', updateBtnState);
-</script>
 
 @endsection
 
