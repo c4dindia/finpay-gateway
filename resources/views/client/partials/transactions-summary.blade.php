@@ -19,34 +19,61 @@
         ? 'All services'
         : ($serviceOptionLabels[$serviceKey] ?? strtoupper($serviceKey));
     $totalCount = method_exists($transactions, 'total') ? $transactions->total() : count($transactions);
+    $pageCount = $transactions->count();
     $pageVolume = $transactions->sum(function ($t) use ($isFailedPage) {
         return (float) ($isFailedPage ? $t->amount : ($t->settled_amount ?? $t->amount));
     });
+    $hasPageStats = method_exists($transactions, 'firstItem') && $pageCount > 0;
+    $rangeLabel = $hasPageStats
+        ? $transactions->firstItem() . '–' . $transactions->lastItem()
+        : '';
 @endphp
-<div class="fd-trans-summary">
-    <div class="fd-trans-summary__item fd-trans-summary__item--primary">
-        <span class="fd-trans-summary__label">{{ $isFailedPage ? 'Failed' : 'Total' }}</span>
-        <span class="fd-trans-summary__value">{{ number_format($totalCount) }}</span>
-        <span class="fd-trans-summary__meta">transactions</span>
-    </div>
-    @if (method_exists($transactions, 'firstItem') && $transactions->count() > 0)
-        <div class="fd-trans-summary__divider" aria-hidden="true"></div>
-        <div class="fd-trans-summary__item">
-            <span class="fd-trans-summary__label">This page</span>
-            <span class="fd-trans-summary__value">{{ number_format($transactions->count()) }}</span>
-            <span class="fd-trans-summary__meta">{{ $transactions->firstItem() }}–{{ $transactions->lastItem() }} shown</span>
+<div class="fd-trans-tiles">
+    <div class="fd-trans-tile fd-trans-tile--{{ $isFailedPage ? 'rose' : 'green' }}">
+        <div class="fd-trans-tile__glow" aria-hidden="true"></div>
+        <div class="fd-trans-tile__top">
+            <span class="fd-trans-tile__label">{{ $isFailedPage ? 'Failed total' : 'Total transactions' }}</span>
+            @unless ($isFailedPage)
+                <svg class="fd-trans-tile__arrow fd-trans-tile__arrow--green" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M3.5 10.5L10.5 3.5M10.5 3.5H5M10.5 3.5V9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            @endunless
         </div>
-        <div class="fd-trans-summary__divider" aria-hidden="true"></div>
-        <div class="fd-trans-summary__item">
-            <span class="fd-trans-summary__label">Page volume</span>
-            <span class="fd-trans-summary__value">{{ number_format($pageVolume, 2) }}</span>
-            <span class="fd-trans-summary__meta">{{ $isFailedPage ? 'amount total' : 'settled total' }}</span>
+        <div class="fd-trans-tile__value">{{ number_format($totalCount) }}</div>
+    </div>
+
+    @if ($hasPageStats)
+        <div class="fd-trans-tile fd-trans-tile--purple">
+            <div class="fd-trans-tile__glow" aria-hidden="true"></div>
+            <div class="fd-trans-tile__top">
+                <span class="fd-trans-tile__label">This page</span>
+            </div>
+            <div class="fd-trans-tile__value">{{ number_format($pageCount) }}</div>
+            <div class="fd-trans-tile__foot">
+                <span class="fd-trans-tile__sub">{{ $rangeLabel }}</span>
+            </div>
+        </div>
+
+        <div class="fd-trans-tile fd-trans-tile--blue">
+            <div class="fd-trans-tile__glow" aria-hidden="true"></div>
+            <div class="fd-trans-tile__top">
+                <span class="fd-trans-tile__label">Page volume</span>
+            </div>
+            <div class="fd-trans-tile__value">{{ number_format($pageVolume, 2) }}</div>
+            <div class="fd-trans-tile__foot">
+                <span class="fd-trans-tile__sub">{{ $isFailedPage ? 'amount total' : 'Settled total' }}</span>
+            </div>
         </div>
     @endif
-    <div class="fd-trans-summary__divider fd-trans-summary__divider--hide-sm" aria-hidden="true"></div>
-    <div class="fd-trans-summary__item fd-trans-summary__item--filters">
-        <span class="fd-trans-summary__label">View</span>
-        <span class="fd-trans-summary__value fd-trans-summary__value--text">{{ $periodLabel }}</span>
-        <span class="fd-trans-summary__meta">{{ $serviceLabel }}</span>
+
+    <div class="fd-trans-tile fd-trans-tile--slate">
+        <div class="fd-trans-tile__glow" aria-hidden="true"></div>
+        <div class="fd-trans-tile__top">
+            <span class="fd-trans-tile__label">View</span>
+        </div>
+        <div class="fd-trans-tile__value fd-trans-tile__value--text">{{ $periodLabel }}</div>
+        <div class="fd-trans-tile__foot">
+            <span class="fd-trans-tile__sub">{{ $serviceLabel }}</span>
+        </div>
     </div>
 </div>
