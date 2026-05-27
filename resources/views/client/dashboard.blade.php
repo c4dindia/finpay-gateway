@@ -279,6 +279,10 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         text-overflow: ellipsis;
     }
     .fd-card-value {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
         font-size: 22px;
         letter-spacing: -0.02em;
     }
@@ -313,6 +317,26 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     .fd-cur-badge {
         font-size: 10px;
         letter-spacing: 0.02em;
+    }
+    .fd-currency-icon {
+        line-height: 1;
+    }
+    .fd-kpi-amount .fd-currency-icon {
+        font-size: 0.95em;
+        margin-right: 6px;
+    }
+    .fd-kpi-icon .fd-currency-icon {
+        font-size: 1.1rem;
+    }
+    .fd-card-value .fd-currency-icon {
+        margin-right: 5px;
+    }
+    .fd-cur-badge .fd-currency-icon {
+        font-size: 14px;
+    }
+    .fd-row-amt .fd-currency-icon {
+        margin-right: 5px;
+        font-size: 0.8em;
     }
     .fd-row {
         align-items: center;
@@ -473,7 +497,9 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                                     <div class="fd-kpi fd-kpi--compact">
                                         <div class="fd-kpi-inner">
                                             <div class="fd-kpi-top">
-                                                <div class="fd-kpi-icon">{{ $kpi['icon'] }}</div>
+                                                <div class="fd-kpi-icon">
+                                                    @include('client.partials.currency-icon', ['code' => $code])
+                                                </div>
                                                 <span class="fd-kpi-filter-wrap">
                                                     <select class="fd-kpi-filter" id="kpiRange-{{ $kpi['slug'] }}" aria-label="{{ $code }} time filter" data-currency="{{ $code }}">
                                                         <option value="total" selected>Total</option>
@@ -483,7 +509,10 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                                                     </select>
                                                 </span>
                                             </div>
-                                            <div class="fd-kpi-amount">{{ $code }} <span id="kpiAmount-{{ $kpi['slug'] }}" style="margin-left: 6px;">{{ number_format((float) $kpi['total'], 2) }}</span></div>
+                                            <div class="fd-kpi-amount">
+                                                @include('client.partials.currency-icon', ['code' => $code])
+                                                <span id="kpiAmount-{{ $kpi['slug'] }}">{{ number_format((float) $kpi['total'], 2) }}</span>
+                                            </div>
                                             <div class="fd-kpi-sub"><small id="kpiSub-{{ $kpi['slug'] }}">All time</small></div>
                                         </div>
                                     </div>
@@ -515,7 +544,8 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                             <div>
                                 <div class="fd-card-title">Transaction Volume</div>
                                 <div class="fd-card-value" id="chartTotalValue">
-                                    <span id="chartTotalCurrency">{{ $mainCurrency }}</span> <span id="chartTotalAmount">{{ number_format($defaultChartTotal, 2) }}</span>
+                                    <span id="chartTotalCurrency">@include('client.partials.currency-icon', ['code' => $mainCurrency])</span>
+                                    <span id="chartTotalAmount">{{ number_format($defaultChartTotal, 2) }}</span>
                                 </div>
                             </div>
                             <div class="text-end">
@@ -542,15 +572,15 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                 <div class="fd-amount-summary-grid">
                     <div class="fd-amt-stat fd-amt-stat--received">
                         <span class="fd-amt-stat-label">Total Received</span>
-                        <span class="fd-amt-stat-value">INR {{ number_format($inrTotal, 2) }}</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotal, 2) }}</span>
                     </div>
                     <div class="fd-amt-stat fd-amt-stat--settled">
                         <span class="fd-amt-stat-label">Total Settled</span>
-                        <span class="fd-amt-stat-value">INR {{ number_format($settledAmount, 2) }}</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($settledAmount, 2) }}</span>
                     </div>
                     <div class="fd-amt-stat fd-amt-stat--balance">
                         <span class="fd-amt-stat-label">Net Balance</span>
-                        <span class="fd-amt-stat-value">INR {{ number_format($inrTotal - $settledAmount - $settleAmountCommission, 2) }}</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotal - $settledAmount - $settleAmountCommission, 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -588,13 +618,13 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                             };
                         @endphp
                         <div class="fd-row" data-id="{{ $trans->checkout_id }}">
-                            <div class="fd-cur-badge {{ $curClass }}">{{ $cur }}</div>
+                            <div class="fd-cur-badge {{ $curClass }}">@include('client.partials.currency-icon', ['code' => $cur])</div>
                             <div class="fd-row-mid">
                                 <div class="fd-row-id" title="{{ $checkoutId }}">{{ $shortId }}</div>
                                 <div class="fd-row-date">{{ \Carbon\Carbon::parse($trans->created_at)->format('d/m/Y') }}</div>
                             </div>
                             <div class="fd-row-right">
-                                <div class="fd-row-amt {{ $cls }}">{{ $cur }} {{ number_format((float) $amount, 2) }}</div>
+                                <div class="fd-row-amt {{ $cls }}">@include('client.partials.currency-icon', ['code' => $cur]){{ number_format((float) $amount, 2) }}</div>
                                 <div class="fd-status {{ $cls }}">
                                     <span class="dot"></span>
                                     <span class="lbl">{{ ucfirst($trans->payment_status) }}</span>
@@ -813,6 +843,25 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
 
     const currencyTotals = @json($currencyTotalsJs);
 
+    const currencyLabelHtml = {
+        INR: '<i class="fa-solid fa-indian-rupee-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">INR</span>',
+        USD: '<i class="fa-solid fa-dollar-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">USD</span>',
+        GBP: '<i class="fa-solid fa-sterling-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">GBP</span>',
+        EUR: '<i class="fa-solid fa-euro-sign fd-currency-icon" aria-hidden="true"></i><span class="visually-hidden">EUR</span>',
+        USDT: '<span class="fd-currency-symbol" aria-hidden="true">₮</span><span class="visually-hidden">USDT</span>',
+        ETH: '<span class="fd-currency-symbol" aria-hidden="true">Ξ</span><span class="visually-hidden">ETH</span>',
+        CAD: '<span class="fd-currency-symbol" aria-hidden="true">C$</span><span class="visually-hidden">CAD</span>',
+    };
+
+    function renderCurrencyLabel(el, currency) {
+        if (!el) return;
+        if (currencyLabelHtml[currency]) {
+            el.innerHTML = currencyLabelHtml[currency];
+            return;
+        }
+        el.innerHTML = '<span class="fd-currency-code">' + currency + '</span>';
+    }
+
     function syncChartHeader(currency) {
         const total = parseFloat(currencyTotals[currency] ?? 0);
         const formatted = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total);
@@ -820,7 +869,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         const curEl = document.getElementById('chartTotalCurrency');
         const amtEl = document.getElementById('chartTotalAmount');
 
-        if (curEl) curEl.textContent = currency;
+        renderCurrencyLabel(curEl, currency);
         if (amtEl) amtEl.textContent = formatted;
     }
 
