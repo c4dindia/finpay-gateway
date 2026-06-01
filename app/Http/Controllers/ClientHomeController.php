@@ -54,45 +54,47 @@ class ClientHomeController extends Controller
             $baseQuery = $baseQuery->where('status', $serviceFilter);
         }
 
+        $approvedStatuses = ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'];
+
         $gbpTotal = (clone $baseQuery)->where('currency', 'GBP')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $usdTotal = (clone $baseQuery)->where('currency', 'USD')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $usdtTotal = (clone $baseQuery)->where('currency', 'USDT')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $ethTotal = (clone $baseQuery)->where('currency', 'ETH')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $eurTotal = (clone $baseQuery)->where('currency', 'EUR')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $cadTotal = (clone $baseQuery)->where('currency', 'CAD')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $inrTotal = (clone $baseQuery)->where('currency', 'INR')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->sum('amount');
 
         $inrTotalPayin = (clone $baseQuery)->where('currency', 'INR')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->where('description', 'not like', '%Payout%')
+            ->whereColumn('checkout_id', '!=', 'payment_id')
             ->sum('amount');
 
         $inrTotalPayout = (clone $baseQuery)->where('currency', 'INR')
-            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->whereIn('payment_status', $approvedStatuses)
             ->where('description', 'like', '%Payout%')
+            ->whereColumn('checkout_id', '!=', 'payment_id')
             ->sum('amount');
-
-        $approvedStatuses = ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'];
 
         // -------- TABLE TRANSACTIONS (needed before chart currency is finalized) --------
         $totalTransactions = $baseQuery->get();
@@ -148,7 +150,7 @@ class ClientHomeController extends Controller
         }
 
         // -------- JS Transactions --------
-        $totalTransactionsJSbeforeCondition = Transaction::where('account_id', $accId)->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);
+        $totalTransactionsJSbeforeCondition = Transaction::where('account_id', $accId)->whereIn('payment_status', $approvedStatuses);
         if ($serviceFilter != 'all') {
             $totalTransactionsJSbeforeCondition = $totalTransactionsJSbeforeCondition->where('status', $serviceFilter);
         }
@@ -182,70 +184,6 @@ class ClientHomeController extends Controller
             'inrTotalPayout'
         ));
     }
-
-    // public function getUpdatedAmountValue(Request $request)
-    // {
-    //     $period = $request->input('period');
-    //     $currency = $request->input('currency');
-    //     $accId = Company::where('user_id', Auth::user()->id)->first()->accountId;
-    //     $pluck = "amount";
-    //     $coloumn = "currency";
-    //     // if ($currency == "USDC") {
-    //     //     $pluck = "amount";
-    //     //     $coloumn = "currency";
-    //     // }
-    //     // $pluck ="amount"; $coloumn = "currency";
-
-    //     if ($period === 'total') {
-    //         $curTrans = Transaction::where('account_id', $accId)
-    //             ->where($coloumn, $currency)
-    //             ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success'])
-    //             ->pluck($pluck);
-    //         $amount = $curTrans->sum();
-    //     } elseif ($period === 'thisMonth') {
-    //         $currentYear = Carbon::now()->year;
-    //         $currentMonth = Carbon::now()->month;
-
-    //         $curTrans = Transaction::where('account_id', $accId)
-    //             ->where($coloumn, $currency)
-    //             ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success'])
-    //             ->whereYear('created_at', $currentYear)
-    //             ->whereMonth('created_at', $currentMonth)
-    //             ->pluck($pluck);
-
-    //         $amount = $curTrans->sum();
-    //     } elseif ($period === 'lastMonth') {
-    //         $lastMonth = Carbon::now()->subMonth();  // This gives you the previous month
-    //         $lastMonthYear = $lastMonth->year;
-    //         $lastMonthMonth = $lastMonth->month;
-
-    //         $curTrans = Transaction::where('account_id', $accId)
-    //             ->where($coloumn, $currency)
-    //             ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success'])
-    //             ->whereYear('created_at', $lastMonthYear)
-    //             ->whereMonth('created_at', $lastMonthMonth)
-    //             ->pluck($pluck);
-
-    //         $amount = $curTrans->sum();
-    //     } elseif ($period === 'lastFewMonths') {
-    //         $threeMonthsAgo = Carbon::now()->subMonths(3);
-
-    //         $curTrans = Transaction::where('account_id', $accId)
-    //             ->where($coloumn, $currency)
-    //             ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success'])
-    //             ->whereBetween('created_at', [$threeMonthsAgo, Carbon::now()])
-    //             ->pluck($pluck);
-
-    //         $amount = $curTrans->sum();
-    //     } else {
-    //         $amount = 0;
-    //     }
-
-    //     return response()->json([
-    //         'amount' => round($amount, 5),
-    //         'currency' => $currency,
-    //     ]);
-    // }
 
     public function getUpdatedChartData($currency)
     {

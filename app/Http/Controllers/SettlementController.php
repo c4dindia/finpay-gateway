@@ -54,7 +54,7 @@ class SettlementController extends Controller
 
         $transaction->account_id = $request->accountId;
         $transaction->currency = strtoupper($request->currency);
-        $transaction->amount = -$settledAmount;
+        $transaction->amount = $settledAmount;
         $transaction->description = $request->description;
         $transaction->payment_status = 'Completed';
         $transaction->checkout_id = $uuid;
