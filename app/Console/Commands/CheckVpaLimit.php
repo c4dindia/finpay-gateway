@@ -177,7 +177,7 @@ class CheckVpaLimit extends Command
 
                     if (strtolower($status) === 'success') {
                         $trans->payment_status = 'Completed';
-                    } elseif (strtolower($status) === 'generated') {
+                    } elseif (strtolower($status) === 'generated'  || strtolower($status) === 'transaction in process') {
                         $trans->payment_status = 'Pending';
                     } elseif (strtolower($status) === 'incomplete' || strtolower($status) === 'failure') {
                         $trans->payment_status = 'Failed';

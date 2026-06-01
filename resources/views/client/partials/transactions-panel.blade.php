@@ -78,6 +78,7 @@
                     <option value="all" {{ $type === 'all' ? 'selected' : '' }}>All</option>
                     <option value="payin" {{ $type === 'payin' ? 'selected' : '' }}>Payin</option>
                     <option value="payout" {{ $type === 'payout' ? 'selected' : '' }}>Payout</option>
+                    <option value="settlement" {{ $type === 'settlement' ? 'selected' : '' }}>Settlement</option>
                 </select>
             </div>
             <div class="fd-trans-filters__field">

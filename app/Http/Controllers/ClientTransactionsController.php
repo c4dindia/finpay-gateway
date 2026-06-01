@@ -63,6 +63,8 @@ class ClientTransactionsController extends Controller
             $query->where('description', 'not like', '%Payout%');
         } elseif ($type === 'payout') {
             $query->where('description', 'like', '%Payout%');
+        } elseif ($type === 'settlement') {
+           $query->whereColumn('checkout_id', 'payment_id');
         }
 
         /*
@@ -159,6 +161,8 @@ class ClientTransactionsController extends Controller
             $query->where('description', 'not like', '%Payout%');
         } elseif ($type === 'payout') {
             $query->where('description', 'like', '%Payout%');
+        } elseif ($type === 'settlement') {
+           $query->whereColumn('checkout_id', 'payment_id');
         }
 
         /*
