@@ -252,6 +252,10 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         gap: 10px;
         align-items: stretch;
     }
+    .fd-amount-summary-grid--row2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 10px;
+    }
     .fd-amt-stat {
         border-radius: 14px;
         padding: 14px 12px;
@@ -371,6 +375,44 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     .fd-amt-stat--balance .fd-amt-stat-value {
         color: #059669;
     }
+    .fd-amt-stat-arrow {
+        margin-right: 4px;
+        font-size: 10px;
+    }
+    .fd-amt-stat--payin {
+        background: #ecfdf5;
+        border: 1px solid rgba(16, 185, 129, 0.18);
+    }
+    .fd-amt-stat--payin .fd-amt-stat-label {
+        color: #047857;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+    }
+    .fd-amt-stat--payin .fd-amt-stat-value {
+        color: #047857;
+    }
+    .fd-amt-stat--payin .fd-amt-stat-arrow {
+        color: #10b981;
+    }
+    .fd-amt-stat--payout {
+        background: #fffbeb;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    .fd-amt-stat--payout .fd-amt-stat-label {
+        color: #b45309;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+    }
+    .fd-amt-stat--payout .fd-amt-stat-value {
+        color: #b45309;
+    }
+    .fd-amt-stat--payout .fd-amt-stat-arrow {
+        color: #f59e0b;
+    }
     .fd-root.is-dark .fd-amt-stat--received {
         background: rgba(37, 99, 235, 0.12);
     }
@@ -392,9 +434,34 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     .fd-root.is-dark .fd-amt-stat--balance .fd-amt-stat-value {
         color: #34d399;
     }
+    .fd-root.is-dark .fd-amt-stat--payin {
+        background: rgba(16, 185, 129, 0.14);
+        border-color: rgba(52, 211, 153, 0.22);
+    }
+    .fd-root.is-dark .fd-amt-stat--payin .fd-amt-stat-label,
+    .fd-root.is-dark .fd-amt-stat--payin .fd-amt-stat-value {
+        color: #34d399;
+    }
+    .fd-root.is-dark .fd-amt-stat--payin .fd-amt-stat-arrow {
+        color: #6ee7b7;
+    }
+    .fd-root.is-dark .fd-amt-stat--payout {
+        background: rgba(245, 158, 11, 0.14);
+        border-color: rgba(251, 191, 36, 0.22);
+    }
+    .fd-root.is-dark .fd-amt-stat--payout .fd-amt-stat-label,
+    .fd-root.is-dark .fd-amt-stat--payout .fd-amt-stat-value {
+        color: #fbbf24;
+    }
+    .fd-root.is-dark .fd-amt-stat--payout .fd-amt-stat-arrow {
+        color: #fcd34d;
+    }
     @media (max-width: 575.98px) {
         .fd-amount-summary-grid {
             grid-template-columns: 1fr;
+        }
+        .fd-amount-summary-grid--row2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         .fd-amt-stat-value {
             font-size: 18px;
@@ -581,6 +648,26 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
                     <div class="fd-amt-stat fd-amt-stat--balance">
                         <span class="fd-amt-stat-label">Net Balance</span>
                         <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotal - $settledAmount - $settleAmountCommission, 2) }}</span>
+                    </div>
+                </div>
+                @php
+                    $totalPayin = 1284500.00;
+                    $totalPayout = 972300.50;
+                @endphp
+                <div class="fd-amount-summary-grid fd-amount-summary-grid--row2">
+                    <div class="fd-amt-stat fd-amt-stat--payin">
+                        <span class="fd-amt-stat-label">
+                            <i class="fa-solid fa-arrow-down-long fd-amt-stat-arrow" aria-hidden="true"></i>
+                            Total Payin
+                        </span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($totalPayin, 2) }}</span>
+                    </div>
+                    <div class="fd-amt-stat fd-amt-stat--payout">
+                        <span class="fd-amt-stat-label">
+                            <i class="fa-solid fa-arrow-up-long fd-amt-stat-arrow" aria-hidden="true"></i>
+                            Total Payout
+                        </span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($totalPayout, 2) }}</span>
                     </div>
                 </div>
             </div>
