@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('mid')->nullable();
             $table->string('vpa')->nullable();
             $table->string('midv2')->nullable();
+            $table->string('midv3')->nullable();
             $table->string('api_key')->nullable();
             $table->string('b_token')->nullable();
             $table->string('status')->default('1');

@@ -73,6 +73,14 @@
                 </select>
             </div>
             <div class="fd-trans-filters__field">
+                <label class="fd-trans-filters__label" for="type">Type</label>
+                <select name="type" id="type" class="fd-trans-filters__select" data-fd-filter required>
+                    <option value="all" {{ $type === 'all' ? 'selected' : '' }}>All</option>
+                    <option value="payin" {{ $type === 'payin' ? 'selected' : '' }}>Payin</option>
+                    <option value="payout" {{ $type === 'payout' ? 'selected' : '' }}>Payout</option>
+                </select>
+            </div>
+            <div class="fd-trans-filters__field">
                 <label class="fd-trans-filters__label" for="service">Service</label>
                 <select name="service" id="service" class="fd-trans-filters__select" data-fd-filter>
                     <option value="all" {{ $selectedService === 'all' ? 'selected' : '' }}>All services</option>

@@ -611,7 +611,7 @@ class UpiPaymentController extends Controller
         $status = $request->input('status');
         if (strtolower($status) === 'success') {
             $trans->payment_status = 'Completed';
-        } elseif (strtolower($status) === 'failure') {
+        } elseif (strtolower($status) === 'failure' || strtolower($status) === 'incomplete') {
             $trans->payment_status = 'Failed';
         } else {
             $trans->payment_status = ucfirst(strtolower($status));
@@ -637,9 +637,9 @@ class UpiPaymentController extends Controller
                 'headers' => $headers,
                 'timeout' => 15,
             ]);
-            Log::info("p23 forward OK response from client, status: {$resp->getStatusCode()}");
+            Log::info("P23 forward OK response from client, status: {$resp->getStatusCode()}");
         } catch (RequestException $e) {
-            Log::warning("p23 forward api to client failed: " . $e->getMessage());
+            Log::warning("P23 forward api to client failed: " . $e->getMessage());
         }
 
         return response()->json([
@@ -696,9 +696,9 @@ class UpiPaymentController extends Controller
                 'headers' => $headers,
                 'timeout' => 15,
             ]);
-            Log::info("p23 forward OK response from client, status: {$resp->getStatusCode()}");
+            Log::info("P23 forward OK response from client, status: {$resp->getStatusCode()}");
         } catch (RequestException $e) {
-            Log::warning("p23 forward api to client failed: " . $e->getMessage());
+            Log::warning("P23 forward api to client failed: " . $e->getMessage());
         }
 
         return response()->json([
@@ -773,6 +773,8 @@ class UpiPaymentController extends Controller
                     $trans->payment_status = 'Completed';
                 } elseif (strtolower($status) === 'generated') {
                     $trans->payment_status = 'Pending';
+                } elseif (strtolower($status) === 'incomplete' || strtolower($status) === 'failure') {
+                    $trans->payment_status = 'Failed';
                 } else {
                     $trans->payment_status = ucfirst(strtolower($status));
                 }
@@ -874,6 +876,8 @@ class UpiPaymentController extends Controller
                         $trans->payment_status = 'Completed';
                     } elseif (strtolower($status) === 'generated') {
                         $trans->payment_status = 'Pending';
+                    } elseif (strtolower($status) === 'incomplete' || strtolower($status) === 'failure') {
+                        $trans->payment_status = 'Failed';
                     } else {
                         $trans->payment_status = ucfirst(strtolower($status));
                     }
@@ -906,11 +910,7 @@ class UpiPaymentController extends Controller
                 return back()->with('error', 'Failed to update transaction status.');
             }
 
-            $orderId = str_replace(
-                ['Payout order initiated: ', 'Payout completed: '],
-                '',
-                $trans->description
-            );
+            $orderId = trim(str_replace('Payout order initiated: ', '', $trans->description));
 
             try {
                 $response = $client->post($path, [
@@ -934,11 +934,15 @@ class UpiPaymentController extends Controller
 
                     if (strtolower($status) === 'success') {
                         $trans->payment_status = 'Completed';
+                        $trans->description = 'Payout completed: ' . $orderId;
+                    } elseif (strtolower($status) === 'processing') {
+                        $trans->payment_status = 'Pending';
+                        $trans->description = 'Payout order initiated: ' . $orderId;
                     } else {
                         $trans->payment_status = ucfirst(strtolower($status));
+                        $trans->description = 'Payout failed: ' . $orderId;
                     }
 
-                    $trans->description = 'Payout ' . $status . ': ' . $orderId;
                     $trans->save();
 
                     return back()->with('success', 'Transaction status updated successfully.');

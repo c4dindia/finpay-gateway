@@ -21,6 +21,7 @@ class ClientTransactionsController extends Controller
         $p6Exist = PSixPaymentMethod::where('status', '1')->where('accountId', $accId)->exists();
 
         $select  = $request->name ?? 'total';
+        $type    = $request->type ?? 'all';
         $service = $request->service ?? 'all';
         $q       = trim((string) $request->query('q', ''));
 
@@ -55,6 +56,17 @@ class ClientTransactionsController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Type Filter
+        |--------------------------------------------------------------------------
+        */
+        if ($type === 'payin') {
+            $query->where('description', 'not like', '%Payout%');
+        } elseif ($type === 'payout') {
+            $query->where('description', 'like', '%Payout%');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Service Filter (status column)
         |--------------------------------------------------------------------------
         */
@@ -84,7 +96,8 @@ class ClientTransactionsController extends Controller
             'select',
             'accId',
             'p6Exist',
-            'service'
+            'service',
+            'type'
         ));
     }
 
@@ -95,6 +108,7 @@ class ClientTransactionsController extends Controller
         $p6Exist = PSixPaymentMethod::where('status', '1')->where('accountId', $accId)->exists();
 
         $select  = $request->name ?? 'total';
+        $type    = $request->type ?? 'all';
         $service = $request->service ?? 'all';
         $q       = trim((string) $request->query('q', ''));
 
@@ -138,6 +152,17 @@ class ClientTransactionsController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Type Filter
+        |--------------------------------------------------------------------------
+        */
+        if ($type === 'payin') {
+            $query->where('description', 'not like', '%Payout%');
+        } elseif ($type === 'payout') {
+            $query->where('description', 'like', '%Payout%');
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Search Filter
         |--------------------------------------------------------------------------
         */
@@ -153,7 +178,7 @@ class ClientTransactionsController extends Controller
             ->paginate(50)
             ->appends($request->all());
 
-        return view('client.failed-transactions', compact('transactions','select'));
+        return view('client.failed-transactions', compact('transactions','select','type'));
     }
 
     public function downloadTransactions(Request $request)

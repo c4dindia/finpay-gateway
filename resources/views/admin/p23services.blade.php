@@ -33,7 +33,8 @@ $currentPage = 'P23 Services';
                     <th class="table-header text-center p-3">Account ID</th>
                     <th class="table-header text-center p-3">MID</th>
                     <th class="table-header text-center p-3">VPA</th>
-                    <th class="table-header text-center p-3">MIDv2</th>
+                    <th class="table-header text-center p-3">MID v2</th>
+                    <th class="table-header text-center p-3">MID v3</th>
                     <th class="table-header text-center p-3">Status</th>
                     <th class="table-header text-center p-3">Action</th>
                 </tr>
@@ -58,6 +59,9 @@ $currentPage = 'P23 Services';
                     </td>
                     <td class="table-data text-center">
                         {{ $company->midv2 ?? '-' }}
+                    </td>
+                    <td class="table-data text-center">
+                        {{ $company->midv3 ?? '-' }}
                     </td>
                     <td class="table-data text-center @if($company->status == '1')text-success @else text-danger @endif">@if($company->status == '1') Active @else Deactivated @endif</td>
                     <td class="table-data text-center">
@@ -92,7 +96,7 @@ $currentPage = 'P23 Services';
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
                                                     <label for="mid-{{ $company->id }}" class="form-label">MID</label>
-                                                    <select name="mid" class="form-control mid-select" id="mid-{{ $company->id }}" required>
+                                                    <select name="mid" class="form-control mid-select" id="mid-{{ $company->id }}">
                                                         <option value="">Select MID</option>
                                                         @foreach($merchants as $merchant)
                                                             <option value="{{ $merchant['mid'] }}"
@@ -105,7 +109,7 @@ $currentPage = 'P23 Services';
 
                                                 <div class="col-md-6 mb-3">
                                                     <label for="vpa-{{ $company->id }}" class="form-label">VPA</label>
-                                                    <select name="vpa" class="form-control vpa-select" id="vpa-{{ $company->id }}" required>
+                                                    <select name="vpa" class="form-control vpa-select" id="vpa-{{ $company->id }}">
                                                         <option value="">Select VPA</option>
                                                     </select>
                                                 </div>
@@ -118,6 +122,13 @@ $currentPage = 'P23 Services';
                                                     <input type="text" class="form-control" id="midv2" name="midv2" value="{{ $company->midv2 }}">
                                                 </div>
 
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="midv3" class="form-label">MID .v3</label>
+                                                    <input type="text" class="form-control" id="midv3" name="midv3" value="{{ $company->midv3 }}">
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
                                                 <div class="col-md-6 mb-3">
                                                     <label for="status" class="form-label">Status</label>
                                                     <select class="form-select" name="status" id="status" required>

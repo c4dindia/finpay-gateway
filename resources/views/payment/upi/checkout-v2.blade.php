@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UPI V2 Payment</title>
-    <link rel="icon" href="{{ asset('images/Rayzen-Pay-logo.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/fin-group-logo.svg') }}" type="image/x-icon">
 
     <style>
         *,
@@ -692,6 +692,7 @@
                 <div class="result-footer">No amount was debited</div>
             </div>
 
+            {{--
             <form method="GET" action="{{ route('p23.payment.retry.v2', $checkout_id) }}" onsubmit="disableRetryButton(this)">
                 @csrf
                 <input type="hidden" name="token" value="{{ request()->get('token') }}">
@@ -703,6 +704,7 @@
                     <span>Retry</span>
                 </button>
             </form>
+            --}}
         </div>
 
         <div id="expiredPanel" class="result-sheet result--expired" role="status" aria-live="polite">
@@ -732,6 +734,7 @@
                 <div class="result-footer">No amount was debited</div>
             </div>
             
+            {{--
             <form method="GET" action="{{ route('p23.payment.retry.v2', $checkout_id) }}" onsubmit="disableRetryButton(this)">
                 @csrf
                 <input type="hidden" name="token" value="{{ request()->get('token') }}">
@@ -743,6 +746,7 @@
                     <span>Retry</span>
                 </button>
             </form>
+            --}}
         </div>
     </div>
 

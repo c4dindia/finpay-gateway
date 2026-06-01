@@ -91,7 +91,7 @@ class CheckVpaLimit extends Command
                         $trans->payment_status = 'Completed';
                     } elseif (strtolower($status) === 'generated') {
                         $trans->payment_status = 'Pending';
-                    } else {
+                    } elseif (strtolower($status) === 'incomplete' || strtolower($status) === 'failure') {
                         $trans->payment_status = ucfirst(strtolower($status));
                     }
 
@@ -104,6 +104,27 @@ class CheckVpaLimit extends Command
                     }
 
                     $trans->save();
+
+                    // forward to client
+                    if (in_array($trans->payment_status, ['Completed', 'Failed'])) {
+                        $account = UPIPayment::where('accountId', $trans->account_id)->first();
+
+                        try {
+                            $headers = [
+                                'Content-Type'  => 'application/json',
+                                'Authorization' => $account->b_token,
+                            ];
+
+                            $webhook = new Client();
+                            $resp = $webhook->get($account->redirect_url . '/api/finpay/p23/' . $trans->checkout_id, [
+                                'headers' => $headers,
+                                'timeout' => 15,
+                            ]);
+                            Log::info("P23 forward OK response from client, status: {$resp->getStatusCode()}");
+                        } catch (RequestException $e) {
+                            Log::warning("P23 forward api to client failed: " . $e->getMessage());
+                        }
+                    }
                 } else {
                     Log::error('UPI Cron: Transaction status API failed', [
                         'checkout_id' => $trans->checkout_id
@@ -158,6 +179,8 @@ class CheckVpaLimit extends Command
                         $trans->payment_status = 'Completed';
                     } elseif (strtolower($status) === 'generated') {
                         $trans->payment_status = 'Pending';
+                    } elseif (strtolower($status) === 'incomplete' || strtolower($status) === 'failure') {
+                        $trans->payment_status = 'Failed';
                     } else {
                         $trans->payment_status = ucfirst(strtolower($status));
                     }
@@ -171,14 +194,35 @@ class CheckVpaLimit extends Command
                     }
 
                     $trans->save();
+
+                    // forward to client
+                    if (in_array($trans->payment_status, ['Completed', 'Failed'])) {
+                        $account = UPIPayment::where('accountId', $trans->account_id)->first();
+
+                        try {
+                            $headers = [
+                                'Content-Type'  => 'application/json',
+                                'Authorization' => $account->b_token,
+                            ];
+
+                            $webhook = new Client();
+                            $resp = $webhook->get($account->redirect_url . '/api/finpay/p23/' . $trans->checkout_id, [
+                                'headers' => $headers,
+                                'timeout' => 15,
+                            ]);
+                            Log::info("P23 forward OK response from client, status: {$resp->getStatusCode()}");
+                        } catch (RequestException $e) {
+                            Log::warning("P23 forward api to client failed: " . $e->getMessage());
+                        }
+                    }
                 } else {
-                    Log::error('UPI Cron: V2Transaction status API failed', [
+                    Log::error('UPI Cron: V2/v3 Transaction status API failed', [
                         'checkout_id' => $trans->checkout_id,
                         'error' => $response->getBody()
                     ]);
                 }
             } catch (RequestException $e) {
-                Log::error('UPI Cron: V2 Transaction status request exception', [
+                Log::error('UPI Cron: V2/V3 Transaction status request exception', [
                     'checkout_id' => $trans->checkout_id,
                     'error' => $e->getMessage()
                 ]);

@@ -82,6 +82,16 @@ class ClientHomeController extends Controller
             ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
             ->sum('amount');
 
+        $inrTotalPayin = (clone $baseQuery)->where('currency', 'INR')
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->where('description', 'not like', '%Payout%')
+            ->sum('amount');
+
+        $inrTotalPayout = (clone $baseQuery)->where('currency', 'INR')
+            ->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'])
+            ->where('description', 'like', '%Payout%')
+            ->sum('amount');
+
         $approvedStatuses = ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid'];
 
         // -------- TABLE TRANSACTIONS (needed before chart currency is finalized) --------
@@ -167,7 +177,9 @@ class ClientHomeController extends Controller
             'totalTransactions',
             'totalTransactionsJS',
             'settledAmount',
-            'settleAmountCommission'
+            'settleAmountCommission',
+            'inrTotalPayin',
+            'inrTotalPayout'
         ));
     }
 

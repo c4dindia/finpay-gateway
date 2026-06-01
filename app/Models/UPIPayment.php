@@ -16,6 +16,7 @@ class UPIPayment extends Model
         'mid',
         'vpa',
         'midv2',
+        'midv3',
         'api_key',
         'b_token',
         'status',

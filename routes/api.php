@@ -36,6 +36,7 @@ use App\Http\Controllers\YaspaController;
 use App\Http\Controllers\UniqoPayController;
 use App\Http\Controllers\UpiPaymentController;
 use App\Http\Controllers\UpiV2Controller;
+use App\Http\Controllers\UpiV3Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -180,8 +181,12 @@ Route::middleware(['bearer.token'])->group(function () {
     Route::post('/payment/{accId}/p23/checkout', [UpiPaymentController::class, 'createCheckout']);    //Upi Host to Host
     Route::post('/payout/{accId}/p23/checkout', [UpiPaymentController::class, 'createPayout']);    //Upi Payout
     Route::get('/payment/{accId}/p23/getPaymentStatus/{checkout_id}', [UpiPaymentController::class, 'getTransactionStatus']); //Upi payment status
+
     Route::post('/payment/{accId}/p23/v2/checkout', [UpiV2Controller::class, 'createCheckoutV2']);    //Upi Payin Checkout V2
-    Route::get('/payment/{accId}/p23/v2/getPaymentStatus/{checkout_id}', [UpiV2Controller::class, 'getTransactionStatus']); //Upi v2 payment status
+    Route::get('/payment/{accId}/p23/v2/getPaymentStatus/{checkout_id}', [UpiV3Controller::class, 'getTransactionStatus']); //Upi v2 payment status
+
+    Route::post('/payment/{accId}/p23/v3/checkout', [UpiV3Controller::class, 'createCheckoutV3']);    //Upi Payin Checkout V3
+    Route::get('/payment/{accId}/p23/v3/getPaymentStatus/{checkout_id}', [UpiV3Controller::class, 'getTransactionStatus']); //Upi v3 payment status
 
     Route::post('/p3/generate-payment-link', [TransactionController::class, 'generateX1PaymentResponse']); //X1 Generate Payment Link
 });

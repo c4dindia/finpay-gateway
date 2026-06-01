@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPI Payment</title>
+    <title>UPI V3 Payment</title>
     <link rel="icon" href="{{ asset('images/fin-group-logo.svg') }}" type="image/x-icon">
 
     <style>
@@ -693,7 +693,7 @@
             </div>
 
             {{--
-            <form method="GET" action="{{ route('p23.payment.retry', $checkout_id) }}" onsubmit="disableRetryButton(this)">
+            <form method="GET" action="{{ route('p23.payment.retry.v3', $checkout_id) }}" onsubmit="disableRetryButton(this)">
                 @csrf
                 <input type="hidden" name="token" value="{{ request()->get('token') }}">
                 <button class="pay-btn-dark" type="submit">
@@ -735,7 +735,7 @@
             </div>
             
             {{--
-            <form method="GET" action="{{ route('p23.payment.retry', $checkout_id) }}" onsubmit="disableRetryButton(this)">
+            <form method="GET" action="{{ route('p23.payment.retry.v3', $checkout_id) }}" onsubmit="disableRetryButton(this)">
                 @csrf
                 <input type="hidden" name="token" value="{{ request()->get('token') }}">
                 <button class="pay-btn-dark" type="submit">
@@ -986,7 +986,7 @@
                 statusInterval = setInterval(function () {
                     if (isFinalStatusShown) return;
 
-                    fetch('/p23/payment-status/' + encodeURIComponent(checkoutId))
+                    fetch('/p23/payment-status/v3/' + encodeURIComponent(checkoutId))
                         .then(function (response) {
                             return response.json();
                         })

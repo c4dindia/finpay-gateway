@@ -461,7 +461,7 @@ $currentPage = 'Failed-Transactions';
               <td>{{ \Carbon\Carbon::parse($trans->created_at)->format('H:m , d/M/Y') }}</td>
             </tr>
             <tr>
-              <th scope="row">Updated At</th>
+              <th scope="row">Completed At</th>
               <td>{{ \Carbon\Carbon::parse($trans->updated_at)->format('H:m , d/M/Y') }}</td>
             </tr>
           </tbody>

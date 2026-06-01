@@ -501,7 +501,7 @@ $currentPage = 'Transactions';
             </tr>
 
             <tr>
-              <th scope="row">Updated At</th>
+              <th scope="row">Completed At</th>
               <td>{{ \Carbon\Carbon::parse($trans->updated_at)->format('H:i , d/M/Y') }}</td>
             </tr>
           </tbody>

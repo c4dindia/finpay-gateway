@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UpiPaymentController;
 use App\Http\Controllers\UpiV2Controller;
+use App\Http\Controllers\UpiV3Controller;
 
 /*
 |--------------------------------------------------------------------------
@@ -169,6 +170,7 @@ Route::group(['prefix' => '/user', 'middleware' => ['auth','check.client.status'
     Route::get('/documentations/p23-payin-service', [ClientDocumentsController::class,'p23DocPage'])->name('p23DocPage');
     Route::get('/documentations/p23-payout-service', [ClientDocumentsController::class,'p23PayoutDocPage'])->name('p23PayoutDocPage');
     Route::get('/documentations/p23-payin-v2-service', [ClientDocumentsController::class,'p23v2DocPage'])->name('p23v2DocPage');
+    Route::get('/documentations/p23-payin-v3-service', [ClientDocumentsController::class,'p23v3DocPage'])->name('p23v3DocPage');
 
 });
 
@@ -202,6 +204,8 @@ Route::get('/p23/payment/{checkout_id}/retry', [UpiPaymentController::class, 're
     ->name('p23.payment.retry');
 Route::get('/p23/payment/{checkout_id}/retry/v2', [UpiV2Controller::class, 'retryCheckout'])
     ->name('p23.payment.retry.v2');
+Route::get('/p23/payment/{checkout_id}/retry/v3', [UpiV3Controller::class, 'retryCheckout'])
+    ->name('p23.payment.retry.v3');
 
 //SecurePayZone Payment Page
 Route::get('/payment/p7/payment-page/{checkout_id}',[SecurePayZoneController::class,'viewPaymentPage']);
@@ -246,14 +250,18 @@ Route::get('/payment/p10/purchase/payment-page/{token}', [InabitController::clas
 // upi payment
 Route::get('/p23/payment/{checkout_id}', [UpiPaymentController::class, 'paymentPage'])->name('p23.payment.page');
 Route::get('/p23/payment/v2/{checkout_id}', [UpiV2Controller::class, 'paymentPage'])->name('p23.payment.page-v2');
+Route::get('/p23/payment/v3/{checkout_id}', [UpiV3Controller::class, 'paymentPage'])->name('p23.payment.page-v3');
 Route::get('/p23/payment-status/{checkout_id}', [UpiPaymentController::class, 'getPayinStatus'])->name('p23.payment.status');
 Route::get('/p23/payment-status/v2/{checkout_id}', [UpiV2Controller::class, 'getPayinStatus'])->name('p23.payment.status.v2');
+Route::get('/p23/payment-status/v3/{checkout_id}', [UpiV3Controller::class, 'getPayinStatus'])->name('p23.payment.status.v3');
 Route::get('/p23/payment-expired/{checkout_id}', [UpiPaymentController::class, 'markPayinExpired'])->name('p23.payment.expired');
 
 Route::get('/p23/payment-link', [UpiPaymentController::class, 'paymentLink'])->name('p23-payment-link');
 Route::get('/p23/payment-link/v2', [UpiV2Controller::class, 'paymentLink'])->name('p23-payment-link-v2');
+Route::get('/p23/payment-link/v3', [UpiV3Controller::class, 'paymentLink'])->name('p23-payment-link-v3');
 Route::post('/p23/generate-payment-link',[UpiPaymentController::class,'generatePaymentLink'])->name('p23-generate-payment-link');
 Route::post('/p23/generate-payment-link/v2',[UpiV2Controller::class,'generatePaymentLink'])->name('p23-generate-payment-link-v2');
+Route::post('/p23/generate-payment-link/v3',[UpiV3Controller::class,'generatePaymentLink'])->name('p23-generate-payment-link-v3');
 
 
 Route::get('/inabit-health', function () {

@@ -254,7 +254,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     }
     .fd-amount-summary-grid--row2 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        margin-top: 10px;
+        margin-bottom: 15px;
     }
     .fd-amt-stat {
         border-radius: 14px;
@@ -636,38 +636,35 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         <div class="col-12 col-xxl-4 fd-equal-col d-flex flex-column gap-3">
             <div class="fd-card fd-amount-summary">
                 <h4 class="fd-amount-summary-title">Amount Summary</h4>
-                <div class="fd-amount-summary-grid">
-                    <div class="fd-amt-stat fd-amt-stat--received">
-                        <span class="fd-amt-stat-label">Total Received</span>
-                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotal, 2) }}</span>
-                    </div>
-                    <div class="fd-amt-stat fd-amt-stat--settled">
-                        <span class="fd-amt-stat-label">Total Settled</span>
-                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($settledAmount, 2) }}</span>
-                    </div>
-                    <div class="fd-amt-stat fd-amt-stat--balance">
-                        <span class="fd-amt-stat-label">Net Balance</span>
-                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotal - $settledAmount - $settleAmountCommission, 2) }}</span>
-                    </div>
-                </div>
-                @php
-                    $totalPayin = 1284500.00;
-                    $totalPayout = 972300.50;
-                @endphp
                 <div class="fd-amount-summary-grid fd-amount-summary-grid--row2">
                     <div class="fd-amt-stat fd-amt-stat--payin">
                         <span class="fd-amt-stat-label">
                             <i class="fa-solid fa-arrow-down-long fd-amt-stat-arrow" aria-hidden="true"></i>
                             Total Payin
                         </span>
-                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($totalPayin, 2) }}</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotalPayin, 2) }}</span>
                     </div>
                     <div class="fd-amt-stat fd-amt-stat--payout">
                         <span class="fd-amt-stat-label">
                             <i class="fa-solid fa-arrow-up-long fd-amt-stat-arrow" aria-hidden="true"></i>
                             Total Payout
                         </span>
-                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($totalPayout, 2) }}</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotalPayout, 2) }}</span>
+                    </div>
+                </div>
+
+                <div class="fd-amount-summary-grid">
+                    <div class="fd-amt-stat fd-amt-stat--received">
+                        <span class="fd-amt-stat-label">Net Balance</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotalPayin - $inrTotalPayout, 2) }}</span>
+                    </div>
+                    <div class="fd-amt-stat fd-amt-stat--settled">
+                        <span class="fd-amt-stat-label">Total Settled</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($settledAmount, 2) }}</span>
+                    </div>
+                    <div class="fd-amt-stat fd-amt-stat--balance">
+                        <span class="fd-amt-stat-label">Available</span>
+                        <span class="fd-amt-stat-value"><i class="fa-solid fa-indian-rupee-sign"></i> {{ number_format($inrTotalPayin - $inrTotalPayout - ($settledAmount + $settleAmountCommission), 2) }}</span>
                     </div>
                 </div>
             </div>

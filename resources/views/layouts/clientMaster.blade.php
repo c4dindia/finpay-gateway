@@ -324,6 +324,16 @@
                         Payment Link v2
                     </a>
                 </li>
+                {{--
+                <li class="nav-item @if ($currentPage == 'Payment-Link') active @endif">
+                    <a class="nav-link" href="{{ route('p23-payment-link-v3') }}" target="_blank">
+                        <span class="fd-nav-ico" aria-hidden="true">
+                            {!! $figmaNavIcons['Payment-Link'] !!}
+                        </span>
+                        Payment Link v3
+                    </a>
+                </li>
+                --}}
             </ul>
 
             <div class="fd-sidebar-accent" aria-hidden="true">
@@ -395,6 +405,14 @@
                                 {!! $figmaNavIcons['Payment-Link'] !!}
                             </span>
                             Payment Link v2</a></li>
+                    {{--
+                    <li class="nav-item trans-icon @if ($currentPage == 'Payment-Link') active @endif"><a
+                            class="nav-link" href="{{ route('p23-payment-link-v3') }}" target="_blank">
+                            <span class="fd-nav-ico" aria-hidden="true">
+                                {!! $figmaNavIcons['Payment-Link'] !!}
+                            </span>
+                            Payment Link v3</a></li>
+                    --}}
                 </ul>
 
                 <div class="fd-sidebar-accent" aria-hidden="true">

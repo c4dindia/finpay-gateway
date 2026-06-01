@@ -56,7 +56,7 @@ class ClientDocumentsController extends Controller
         $p20detail = YaspaBanking::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'payin', 'payout', 'status']);
         $p21detail = Alikassa::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
         $p22detail = UniqoPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
-        $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'midv2', 'status']);
+        $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'midv2', 'midv3', 'status']);
         return view('client.documentations', compact(
             'p1detail',
             'p2detail',
@@ -343,5 +343,13 @@ class ClientDocumentsController extends Controller
         $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
 
         return view('client.p23-v2-docs-page');
+    }
+
+    public function p23v3DocPage()
+    {
+        $accId = Company::where('user_id', Auth::user()->id)->first()->accountId;
+        $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
+
+        return view('client.p23-v3-docs-page');
     }
 }

@@ -899,6 +899,7 @@ class CompanyController extends Controller
             'mid' => 'nullable|string',
             'vpa' => 'nullable|string',
             'midv2' => 'nullable|string',
+            'midv3' => 'nullable|string',
             'status' => 'required|in:0,1',
         ]);
 
@@ -908,6 +909,7 @@ class CompanyController extends Controller
             'mid' => $request->mid,
             'vpa' => $request->vpa,
             'midv2' => $request->midv2 ?? null,
+            'midv3' => $request->midv3 ?? null,
             'status' => $request->status,
         ]);
 

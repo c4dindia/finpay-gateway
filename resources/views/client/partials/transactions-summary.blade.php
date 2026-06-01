@@ -61,7 +61,7 @@
             </div>
             <div class="fd-trans-tile__value">{{ number_format($pageVolume, 2) }}</div>
             <div class="fd-trans-tile__foot">
-                <span class="fd-trans-tile__sub">{{ $isFailedPage ? 'amount total' : 'Settled total' }}</span>
+                <span class="fd-trans-tile__sub">Total amount</span>
             </div>
         </div>
     @endif
