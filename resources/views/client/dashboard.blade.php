@@ -475,8 +475,10 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
     $srv = session('service', 'all');
     $recentTransactions = $totalTransactions->sortByDesc('created_at')->take(5);
 
+    $totalTransactionsExceptExpired = $totalTransactions->where('payment_status', '!=', 'Expired');
+
     $capturedTransactions = $totalTransactions->whereIn('payment_status', ['Approved', 'Completed', 'Complete', 'Succeeded', 'Success', 'Captured', 'Paid']);
-    $capturedPercentage = $totalTransactions->count() > 0 ? ($capturedTransactions->count() / $totalTransactions->count()) * 100 : 0;
+    $capturedPercentage = $totalTransactions->count() > 0 ? ($capturedTransactions->count() / $totalTransactionsExceptExpired->count()) * 100 : 0;
     $capturedCount = count($capturedTransactions);
 
     $awaitingTransactions = $totalTransactions->whereIn('payment_status', ['Pending', 'Processing', 'Attempting', 'Waiting', 'In-progress']);
