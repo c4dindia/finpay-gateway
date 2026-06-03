@@ -34,13 +34,15 @@ class UpiV3Controller extends Controller
         }
 
         $validated = $request->validate([
-            'amount'    => 'required|numeric|min:10',
+            'amount'    => 'required|numeric|min:10|max:7000',
             'currency'  => 'required|in:INR',
             'method'    => 'required|in:QR,UPI',
             'url'       => 'required|url',
-            'description' => 'required|string',
-            'mobile'    => 'required|string',
+            'description' => 'required|regex:/^[A-Za-z0-9]+$/',
+            'mobile'    => 'required|digits:10',
             'email'     => 'required|email',
+        ], [
+            'description.regex' => 'Description must contain only letters and numbers.',
         ]);
 
         do {

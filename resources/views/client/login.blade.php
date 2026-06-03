@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in — Client portal</title>
-    <link rel="icon" href="{{ asset('images/Rayzen-Pay-logo.png') }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset('images/fin-group-logo.svg') }}" type="image/x-icon">
     <style>
         /* Same first-paint strategy as clientMaster — avoids theme / token flash before index.css */
         html {

@@ -147,7 +147,9 @@ class UpiPaymentController extends Controller
             'currency' => 'required|in:INR',
             'method' => 'required|in:QR,UPI',
             'url' => 'required|url',
-            'description' => 'required|string',
+            'description' => 'required|regex:/^[A-Za-z0-9]+$/',
+        ], [
+            'description.regex' => 'Description must contain only letters and numbers.',
         ]);
 
         $vpaTotalAmount = Transaction::where('card_number', $checkacc->vpa)
