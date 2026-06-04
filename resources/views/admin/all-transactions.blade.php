@@ -37,8 +37,8 @@ $currentPage = 'All Transactions';
     <h3 class="text-center" style="Font-family:Poppins; font-weight: 500; line-height: 48px; font-size: 24px;">
         Transactions of All Companies </h3>
 
-    <div class="d-flex justify-content-center">
-        <div class="input-group">
+    <div class="d-flex justify-content-center align-items-start gap-3 flex-wrap">
+        <div class="input-group flex-grow-1" style="max-width: 920px;">
             <span class="trans-search-icon d-flex align-items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                     fill="none">
@@ -77,6 +77,17 @@ $currentPage = 'All Transactions';
                 </div>
             </form>
         </div>
+
+        <button type="button" class="fd-admin-download" data-bs-toggle="modal" data-bs-target="#downloadModal"
+            aria-label="Download transaction records">
+            <span class="fd-admin-download__icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 4V15M12 15L7.5 10.5M12 15L16.5 10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M5 18.5H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <span>Download Transactions CSV</span>
+        </button>
     </div>
 
     @if (count($transactions) == 0)
@@ -465,6 +476,158 @@ $currentPage = 'All Transactions';
 </div>
 @endforeach
 
+@php
+    $today = today();
+    $defaultStart = $today->copy()->startOfMonth()->format('Y-m-d');
+    $defaultEnd = $today->format('Y-m-d');
+
+    // Static placeholder receivers — replace with dynamic data when the backend is wired up.
+    $receivers = $receivers ?? [
+        ['id' => 'rec_001', 'name' => 'Company A'],
+        ['id' => 'rec_002', 'name' => 'Company B'],
+    ];
+@endphp
+{{-- TODO: point the form action to the admin download route once backend is in place. --}}
+<div class="modal fade fd-trans-export-modal" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered fd-trans-export-modal__dialog">
+        <form method="GET" action="#" class="modal-content fd-trans-export-modal__content">
+            <div class="modal-header fd-trans-export-modal__header">
+                <div class="fd-trans-export-modal__title-wrap">
+                    <span class="fd-trans-export-modal__title-icon" aria-hidden="true">
+                        <i class="fa fa-download" aria-hidden="true"></i>
+                    </span>
+                    <h5 class="modal-title" id="downloadModalLabel">Export to Excel</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body fd-trans-export-modal__body">
+                <div class="fd-trans-export-presets" role="group" aria-label="Quick date ranges">
+                    <button type="button" class="fd-trans-export-preset" data-range="thisMonth">This month</button>
+                    <button type="button" class="fd-trans-export-preset" data-range="lastMonth">Last month</button>
+                    <button type="button" class="fd-trans-export-preset" data-range="last7">Last 7 days</button>
+                    <button type="button" class="fd-trans-export-preset" data-range="last30">Last 30 days</button>
+                </div>
+                <div class="fd-trans-export-dates">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label for="export_start_date" class="fd-trans-export-modal__field-label">From</label>
+                            <input type="date" name="start_date" id="export_start_date" class="form-control fd-trans-export-date"
+                                value="{{ old('start_date', $defaultStart) }}" required max="{{ $defaultEnd }}">
+                            @error('start_date')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-6">
+                            <label for="export_end_date" class="fd-trans-export-modal__field-label">To</label>
+                            <input type="date" name="end_date" id="export_end_date" class="form-control fd-trans-export-date"
+                                value="{{ old('end_date', $defaultEnd) }}" required max="{{ $defaultEnd }}">
+                            @error('end_date')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fd-trans-export-receiver">
+                    <label for="export_receiver" class="fd-trans-export-modal__field-label">Receiver</label>
+                    <select name="receiver" id="export_receiver" class="form-select fd-trans-export-date">
+                        <option value="all">All receivers</option>
+                        @forelse ($receivers as $r)
+                            @php
+                                $rId = is_array($r) ? ($r['id'] ?? '') : ($r->accountId ?? '');
+                                $rName = is_array($r) ? ($r['name'] ?? $rId) : ($r->company_name ?? $rId);
+                            @endphp
+                            <option value="{{ $rId }}">{{ $rName }}</option>
+                        @empty
+                            <option value="" disabled>No receivers available</option>
+                        @endforelse
+                    </select>
+                   
+                </div>
+            </div>
+            <div class="modal-footer fd-trans-export-modal__footer">
+                <button type="button" class="fd-trans-export-cancel" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="fd-trans-export-submit">
+                    <i class="bi bi-download" aria-hidden="true"></i>
+                    <span>Download</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+(function () {
+    var modal = document.getElementById('downloadModal');
+    if (!modal) return;
+
+    var startInput = document.getElementById('export_start_date');
+    var endInput = document.getElementById('export_end_date');
+    var maxDate = endInput.getAttribute('max');
+
+    function formatDate(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    function clearActivePresets() {
+        modal.querySelectorAll('.fd-trans-export-preset').forEach(function (btn) {
+            btn.classList.remove('is-active');
+        });
+    }
+
+    modal.querySelectorAll('.fd-trans-export-preset').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var now = new Date();
+            var start, end;
+            switch (btn.getAttribute('data-range')) {
+                case 'thisMonth':
+                    start = new Date(now.getFullYear(), now.getMonth(), 1);
+                    end = now;
+                    break;
+                case 'lastMonth':
+                    start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                    end = new Date(now.getFullYear(), now.getMonth(), 0);
+                    break;
+                case 'last7':
+                    end = now;
+                    start = new Date(now);
+                    start.setDate(start.getDate() - 6);
+                    break;
+                case 'last30':
+                    end = now;
+                    start = new Date(now);
+                    start.setDate(start.getDate() - 29);
+                    break;
+            }
+            startInput.value = formatDate(start);
+            endInput.value = formatDate(end);
+            clearActivePresets();
+            btn.classList.add('is-active');
+        });
+    });
+
+    startInput.addEventListener('change', function () {
+        if (startInput.value > endInput.value) endInput.value = startInput.value;
+        clearActivePresets();
+    });
+    endInput.addEventListener('change', function () {
+        if (endInput.value > maxDate) endInput.value = maxDate;
+        if (startInput.value > endInput.value) startInput.value = endInput.value;
+        clearActivePresets();
+    });
+})();
+
+@if ($errors->has('start_date') || $errors->has('end_date'))
+document.addEventListener('DOMContentLoaded', function () {
+    var el = document.getElementById('downloadModal');
+    if (el && typeof bootstrap !== 'undefined') {
+        bootstrap.Modal.getOrCreateInstance(el).show();
+    }
+});
+@endif
+</script>
 
 <script>
     const input = document.querySelector('input[name=q]');

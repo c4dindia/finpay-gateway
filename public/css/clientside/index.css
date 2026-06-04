@@ -1652,6 +1652,11 @@ html * {
     align-items: center;
     gap: 12px;
 }
+/* Self-contained brand vars so the modal renders correctly outside .fd-trans-page (e.g. admin pages) */
+.fd-trans-export-modal {
+    --fd-trans-green: #1a3d2b;
+    --fd-trans-green-mid: #2d5942;
+}
 .fd-trans-export-modal__title-icon {
     display: flex;
     align-items: center;
@@ -1819,17 +1824,18 @@ html * {
     color: #1f2937;
     border-color: #d1d5db;
 }
-/* Beat transactions page inline .btn:hover (nav blue) */
-.fd-trans-page .fd-trans-export-modal .fd-trans-export-cancel:hover,
-.fd-trans-page .fd-trans-export-modal .fd-trans-export-cancel:focus,
-.fd-trans-page .fd-trans-export-modal .fd-trans-export-cancel:active {
+/* Beat inline .btn:hover (nav blue) from host pages — scoped to the modal itself */
+.fd-trans-export-modal .fd-trans-export-cancel:hover,
+.fd-trans-export-modal .fd-trans-export-cancel:focus,
+.fd-trans-export-modal .fd-trans-export-cancel:active {
     background: #f3f4f6 !important;
     border-color: #d1d5db !important;
     color: #374151 !important;
 }
-.fd-trans-page .fd-trans-export-modal .fd-trans-export-submit:hover,
-.fd-trans-page .fd-trans-export-modal .fd-trans-export-submit:focus,
-.fd-trans-page .fd-trans-export-modal .fd-trans-export-submit:active {
+.fd-trans-export-modal .fd-trans-export-submit,
+.fd-trans-export-modal .fd-trans-export-submit:hover,
+.fd-trans-export-modal .fd-trans-export-submit:focus,
+.fd-trans-export-modal .fd-trans-export-submit:active {
     background: linear-gradient(
         135deg,
         var(--fd-trans-green) 0%,
@@ -1882,26 +1888,35 @@ html * {
     background: rgba(10, 14, 26, 0.6);
     border-color: rgba(255, 255, 255, 0.08);
 }
-.fd-root.is-dark .fd-trans-export-cancel {
+.fd-root.is-dark .fd-trans-export-cancel,
+html.is-dark .fd-trans-export-modal .fd-trans-export-cancel {
     background: rgba(15, 21, 37, 0.9);
     border-color: rgba(255, 255, 255, 0.12);
     color: #94a3b8;
 }
-.fd-root.is-dark
-    .fd-trans-page
-    .fd-trans-export-modal
-    .fd-trans-export-cancel:hover,
-.fd-root.is-dark
-    .fd-trans-page
-    .fd-trans-export-modal
-    .fd-trans-export-cancel:focus,
-.fd-root.is-dark
-    .fd-trans-page
-    .fd-trans-export-modal
-    .fd-trans-export-cancel:active {
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-cancel:hover,
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-cancel:focus,
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-cancel:active,
+html.is-dark .fd-trans-export-modal .fd-trans-export-cancel:hover,
+html.is-dark .fd-trans-export-modal .fd-trans-export-cancel:focus,
+html.is-dark .fd-trans-export-modal .fd-trans-export-cancel:active {
     background: rgba(30, 41, 59, 0.8) !important;
     border-color: rgba(255, 255, 255, 0.18) !important;
     color: #e2e8f0 !important;
+}
+/* Dark mode submit — keep a strong, readable green so the button is clearly visible */
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-submit,
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-submit:hover,
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-submit:focus,
+.fd-root.is-dark .fd-trans-export-modal .fd-trans-export-submit:active,
+html.is-dark .fd-trans-export-modal .fd-trans-export-submit,
+html.is-dark .fd-trans-export-modal .fd-trans-export-submit:hover,
+html.is-dark .fd-trans-export-modal .fd-trans-export-submit:focus,
+html.is-dark .fd-trans-export-modal .fd-trans-export-submit:active {
+    background: linear-gradient(135deg, #1f5236 0%, #2d7a55 60%, #38a169 100%) !important;
+    color: #fff !important;
+    box-shadow: 0 8px 22px -6px rgba(56, 161, 105, 0.45) !important;
+    border: none !important;
 }
 
 /* .fd-trans-page — responsive */
