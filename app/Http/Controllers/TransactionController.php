@@ -10,6 +10,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Exports\ClientTransactionsExport;
+use App\Models\Company;
+use App\Models\Transaction;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransactionController extends Controller
 {
@@ -285,5 +289,33 @@ class TransactionController extends Controller
         $checkout_id = $data->checkout_id;
 
         return view('payment.x1.x1-payment-page',compact('currency','amount','email','checkout_id','account_id'));
+    }
+
+    public function downloadCompanyTransactions(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => ['required', 'date'],
+            'end_date'   => ['required', 'date', 'after_or_equal:start_date'],
+            'company' => ['required', 'numeric'],
+        ]);
+
+        $accId = Company::where('id', $validated['company'])->value('accountId');
+
+        if (!$accId) {
+            return back()->withErrors([
+                'account' => 'Account not found for this user.',
+            ]);
+        }
+
+        $start = Carbon::parse($validated['start_date'])->startOfDay();
+        $end   = Carbon::parse($validated['end_date'])->endOfDay();
+
+        $paymentStatus = null;
+        $fileName = 'transactions_' . now()->format('Ymd_His') . '.xlsx';
+
+        return Excel::download(
+            new ClientTransactionsExport($accId, $start, $end, $paymentStatus),
+            $fileName
+        );
     }
 }

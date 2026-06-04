@@ -119,6 +119,7 @@ Route::middleware(['auth','check.status'])->group(function () {
     
     Route::get('/admin/all-transactions',[CompanyController::class,'showAllTransactions'])->name('showAllTransactions');
     Route::get('/admin/all-declined-transactions',[CompanyController::class,'showAllFailedTransactions'])->name('showAllFailedTransactions');
+    Route::post('/admin/download/transactions',[TransactionController::class,'downloadCompanyTransactions'])->name('downloadCompanyTransactions');
 
     Route::get('/admin/settlements',[SettlementController::class,'showSettlements'])->name('showSettlements');
     Route::post('/admin/settlements/add',[SettlementController::class,'addSettlement'])->name('addSettlement');

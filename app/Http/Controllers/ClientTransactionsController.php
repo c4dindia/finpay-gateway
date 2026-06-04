@@ -203,23 +203,6 @@ class ClientTransactionsController extends Controller
         $start = Carbon::parse($validated['start_date'])->startOfDay();
         $end   = Carbon::parse($validated['end_date'])->endOfDay();
 
-        $transactions = Transaction::query()
-            ->where('account_id', $accId)
-            ->whereBetween('created_at', [$start, $end])
-            ->orderByDesc('created_at')
-            // ->limit(300)
-            ->get();
-
-        // $pdf = Pdf::loadView('pdf.transactions-download', [
-        //     'transactions' => $transactions,
-        //     'start_date'   => $start,
-        //     'end_date'     => $end,
-        //     'company'      => Auth::user()->name,
-        //     'email'        => Auth::user()->email,
-        //     'generated_at' => now(),
-        // ])->setPaper('a4', 'landscape');
-
-        // return $pdf->download('transactions_' . now()->format('Ymd_His') . '.pdf');
         $fileName = 'transactions_' . now()->format('Ymd_His') . '.xlsx';
         $paymentStatus = null;
 

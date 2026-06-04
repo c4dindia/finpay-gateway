@@ -1851,8 +1851,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 8px 14px;
-    height: 38px;
+    padding: 10px 14px;
     border: 1px solid rgba(26, 61, 43, 0.22);
     border-radius: 10px;
     color: #fff;

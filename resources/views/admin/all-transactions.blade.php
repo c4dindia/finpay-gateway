@@ -490,7 +490,8 @@ $currentPage = 'All Transactions';
 {{-- TODO: point the form action to the admin download route once backend is in place. --}}
 <div class="modal fade fd-trans-export-modal" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered fd-trans-export-modal__dialog">
-        <form method="GET" action="#" class="modal-content fd-trans-export-modal__content">
+        <form method="POST" action="{{ route('downloadCompanyTransactions') }}" class="modal-content fd-trans-export-modal__content">
+            @csrf
             <div class="modal-header fd-trans-export-modal__header">
                 <div class="fd-trans-export-modal__title-wrap">
                     <span class="fd-trans-export-modal__title-icon" aria-hidden="true">
@@ -529,17 +530,13 @@ $currentPage = 'All Transactions';
                 </div>
 
                 <div class="fd-trans-export-receiver">
-                    <label for="export_receiver" class="fd-trans-export-modal__field-label">Receiver</label>
-                    <select name="receiver" id="export_receiver" class="form-select fd-trans-export-date">
-                        <option value="all">All receivers</option>
-                        @forelse ($receivers as $r)
-                            @php
-                                $rId = is_array($r) ? ($r['id'] ?? '') : ($r->accountId ?? '');
-                                $rName = is_array($r) ? ($r['name'] ?? $rId) : ($r->company_name ?? $rId);
-                            @endphp
-                            <option value="{{ $rId }}">{{ $rName }}</option>
+                    <label for="export_receiver" class="fd-trans-export-modal__field-label">Company</label>
+                    <select name="company" id="export_receiver" class="form-select fd-trans-export-date" required>
+                        <option value="" disabled selected>Select Company</option>
+                        @forelse ($companies as $company)
+                            <option value="{{ $company->id }}">{{ $company->company_name }}</option>
                         @empty
-                            <option value="" disabled>No receivers available</option>
+                            <option value="" disabled>No companies available</option>
                         @endforelse
                     </select>
                    

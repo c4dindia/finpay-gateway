@@ -785,9 +785,12 @@ class CompanyController extends Controller
             ->paginate(50)
             ->appends($request->all());
 
+        $companies = Company::all();
+
         return view('admin.all-transactions', compact(
             'transactions',
-            'service'
+            'service',
+            'companies'
         ));
     }
 
