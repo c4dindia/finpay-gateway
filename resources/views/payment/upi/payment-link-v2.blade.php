@@ -26,8 +26,8 @@
             box-sizing: border-box;
         }
 
-        html{
-             background: radial-gradient(ellipse 900px 700px at 75% -5%, rgba(17, 169, 255, .10), transparent),
+        html {
+            background: radial-gradient(ellipse 900px 700px at 75% -5%, rgba(17, 169, 255, .10), transparent),
                 radial-gradient(ellipse 800px 600px at 10% 105%, rgba(47, 191, 113, .10), transparent),
                 #f4f8fc;
         }
@@ -42,7 +42,7 @@
                 radial-gradient(ellipse 800px 600px at 10% 105%, rgba(47, 191, 113, .10), transparent),
                 #f4f8fc;
             color: var(--text-primary);
-            
+
         }
 
         .page-wrap {
@@ -585,7 +585,7 @@
                         <div class="input-group-custom flex-fill">
                             <label for="input-amount">Amount</label>
                             <div class="input-wrap">
-                                <input type="number" name="amount" id="input-amount" placeholder="0.00" min="10" step="any" required>
+                                <input type="number" name="amount" id="input-amount" placeholder="0.00" step="any" required>
                             </div>
                         </div>
                     </div>
@@ -603,11 +603,7 @@
                         <div class="input-group-custom flex-fill">
                             <label for="input-amount">Phone</label>
                             <div class="input-wrap">
-                                <input type="number" name="phone" id="phone" placeholder="Enter phone" required maxlength="10"
-                                    minlength="10"
-                                    pattern="[0-9]{10}"
-                                    inputmode="numeric"
-                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)">
+                                <input type="number" name="phone" id="phone" placeholder="Enter phone" required>
                             </div>
                         </div>
                     </div>
@@ -621,7 +617,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="generate-link" class="gen-btn" disabled>
+                    <button type="submit" id="generate-link" class="gen-btn">
                         <i class="bi bi-magic me-2"></i>Generate Link
                     </button>
                 </form>
@@ -677,15 +673,7 @@
             var $errorMsg = $('#error-msg');
 
             function checkInputs() {
-                var amountValue = parseFloat($amount.val());
-                var hasAmount = !isNaN(amountValue) && amountValue >= 10;
-                var hasCurrency = $currency.val() !== null && $currency.val().trim() !== '';
-                var hasDescription = description.val().trim() !== '';
-                var phoneValue = phone.val().trim();
-                var hasPhone = /^[0-9]{10}$/.test(phoneValue);
-                var hasUrl = url.val().trim() !== '' && url[0].checkValidity();
-
-                $btn.prop('disabled', !(hasAmount && hasCurrency && hasDescription && hasPhone && hasUrl));
+                return true;
             }
 
             function clearError() {
@@ -704,8 +692,41 @@
 
             $form.on('submit', function(e) {
                 e.preventDefault();
+                clearError();
 
-                clearError(); // remove previous error
+                var amountValue = parseFloat($amount.val());
+                var hasAmount = !isNaN(amountValue) && amountValue >= 10 && amountValue <= 7000;
+                var descriptionValue = description.val().trim();
+                var hasDescription = /^[A-Za-z0-9 ]+$/.test(descriptionValue);
+                var phoneValue = phone.val().trim();
+                var hasPhone = /^[0-9]{10}$/.test(phoneValue);
+                var hasUrl = url.val().trim() !== '' && url[0].checkValidity();
+
+
+                if (!hasAmount) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Amount must be between 10 and 7000.');
+                    return;
+                }
+
+                if (!hasDescription) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Description must contain only letters, numbers, and spaces.');
+                    return;
+                }
+
+                if (!hasPhone) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Phone number must be exactly 10 digits.');
+                    return;
+                }
+
+                if (!hasUrl) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Please enter a valid URL.');
+                    return;
+                }
+
                 $btn.prop('disabled', true);
                 $('#link-section').addClass('d-none');
                 $spinner.removeClass('d-none');
@@ -750,14 +771,31 @@
                                 $errorMsg.text(response.error);
                                 checkInputs();
                             }
-                        }, 1500);
+                        }, 200);
 
                     },
                     error: function(xhr) {
                         clearError();
 
+                        $spinner.addClass('d-none');
+
+                        let message = 'Something went wrong.';
+
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.errors) {
+                                let errors = xhr.responseJSON.errors;
+                                let firstKey = Object.keys(errors)[0];
+                                message = errors[firstKey][0];
+                            } else if (xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON.error) {
+                                message = xhr.responseJSON.error;
+                            }
+                        }
+
                         $errorBox.removeClass('d-none');
-                        $errorMsg.text(xhr.responseJSON?.message || 'Something went wrong.');
+                        $errorMsg.text(message);
+
                         checkInputs();
                     }
                 });

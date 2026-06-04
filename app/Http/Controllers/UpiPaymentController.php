@@ -963,6 +963,12 @@ class UpiPaymentController extends Controller
     {
         $accId = Company::where('user_id', auth()->id())->value('accountId');
 
+        $mid = UPIPayment::where('accountId', $accId)->where('status', '1')->value('mid');
+
+        if (!$mid) {
+            abort(403, 'No active UPI merchant found.');
+        }
+
         return view('payment.upi.payment-link', compact('accId'));
     }
 

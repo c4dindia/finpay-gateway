@@ -38,7 +38,7 @@ class UpiV2Controller extends Controller
             'currency'  => 'required|in:INR',
             'method'    => 'required|in:QR,UPI',
             'url'       => 'required|url',
-            'description' => 'required|regex:/^[A-Za-z0-9]+$/',
+            'description' => 'required|regex:/^[A-Za-z0-9 ]+$/',
             'mobile'    => 'required|digits:10',
         ], [
             'description.regex' => 'Description must contain only letters and numbers.',
@@ -488,6 +488,12 @@ class UpiV2Controller extends Controller
     public function paymentLink()
     {
         $accId = Company::where('user_id', auth()->id())->value('accountId');
+
+        $midv2 = UPIPayment::where('accountId', $accId)->where('status', '1')->value('midv2');
+
+        if (!$midv2) {
+            abort(403, 'No active UPI merchant found.');
+        }
 
         return view('payment.upi.payment-link-v2', compact('accId'));
     }

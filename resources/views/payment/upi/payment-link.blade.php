@@ -577,7 +577,7 @@
                     <div class="input-group-custom flex-fill">
                         <label for="input-amount">Amount</label>
                         <div class="input-wrap">
-                            <input type="number" name="amount" id="input-amount" placeholder="0.00" min="0" step="any" required>
+                            <input type="number" name="amount" id="input-amount" placeholder="0.00" step="any" required>
                         </div>
                     </div>
                 </div>
@@ -600,7 +600,7 @@
                     </div>
                 </div>
 
-                <button type="submit" id="generate-link" class="gen-btn" disabled>
+                <button type="submit" id="generate-link" class="gen-btn">
                     <i class="bi bi-magic me-2"></i>Generate Link
                 </button>
             </form>
@@ -659,12 +659,7 @@
             var $errorMsg = $('#error-msg');
 
             function checkInputs() {
-                var hasAmount = $amount.val().trim() !== '';
-                var hasCurrency = $currency.val() !== null && $currency.val().trim() !== '';
-                var hasDescription = description.val().trim() !== '';
-                var hasUrl = url.val().trim() !== '' && url[0].checkValidity();
-
-                $btn.prop('disabled', !(hasAmount && hasCurrency && hasDescription && hasUrl));
+                return true;
             }
 
             function clearError() {
@@ -679,8 +674,33 @@
 
             $form.on('submit', function(e) {
                 e.preventDefault();
+                clearError();
 
-                clearError(); // remove previous error
+                var amountValue = parseFloat($amount.val());
+                var hasAmount = !isNaN(amountValue) && amountValue >= 1 && amountValue <= 7000;
+                var descriptionValue = description.val().trim();
+                var hasDescription = /^[A-Za-z0-9 ]+$/.test(descriptionValue);
+                var hasUrl = url.val().trim() !== '' && url[0].checkValidity();
+
+
+                if (!hasAmount) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Amount must be between 1 and 7000.');
+                    return;
+                }
+
+                if (!hasDescription) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Description must contain only letters, numbers, and spaces.');
+                    return;
+                }
+
+                if (!hasUrl) {
+                    $errorBox.removeClass('d-none');
+                    $errorMsg.text('Please enter a valid URL.');
+                    return;
+                }
+
                 $btn.prop('disabled', true);
                 $('#link-section').addClass('d-none');
                 $spinner.removeClass('d-none');
@@ -723,14 +743,31 @@
                                 $errorMsg.text(response.error);
                                 checkInputs();
                             }
-                        }, 1500);
+                        }, 200);
 
                     },
                     error: function(xhr) {
                         clearError();
 
+                        $spinner.addClass('d-none');
+
+                        let message = 'Something went wrong.';
+
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.errors) {
+                                let errors = xhr.responseJSON.errors;
+                                let firstKey = Object.keys(errors)[0];
+                                message = errors[firstKey][0];
+                            } else if (xhr.responseJSON.message) {
+                                message = xhr.responseJSON.message;
+                            } else if (xhr.responseJSON.error) {
+                                message = xhr.responseJSON.error;
+                            }
+                        }
+
                         $errorBox.removeClass('d-none');
-                        $errorMsg.text(xhr.responseJSON?.message || 'Something went wrong.');
+                        $errorMsg.text(message);
+
                         checkInputs();
                     }
                 });
