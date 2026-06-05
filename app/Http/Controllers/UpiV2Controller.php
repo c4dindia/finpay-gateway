@@ -414,6 +414,7 @@ class UpiV2Controller extends Controller
                 "amount" => number_format($transaction->amount, 2),
                 "checkout_id" => $transaction->checkout_id,
                 "payment_id" => $transaction->payment_id,
+                "utr" => $transaction->token,
                 "payment_status" => ucfirst($transaction->payment_status),
                 "description" => $transaction->description,
                 "created_at" => $transaction->created_at

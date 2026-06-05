@@ -719,12 +719,19 @@ class UpiPaymentController extends Controller
             return response()->json(['message' => 'Unauthorized Checkout Id or Transaction not completed.'], 401);
         }
 
+        $isPayout = stripos($transaction->description, 'Payout') !== false;
+
+        $utr = $isPayout
+            ? $transaction->payment_id
+            : $transaction->token;
+
         return response()->json([
             'data' => [
                 "currency" => $transaction->currency,
                 "amount" => number_format($transaction->amount, 2),
                 "checkout_id" => $transaction->checkout_id,
                 "payment_id" => $transaction->payment_id,
+                "utr" => $utr,
                 "payment_status" => ucfirst($transaction->payment_status),
                 "description" => $transaction->description,
                 "created_at" => $transaction->created_at
