@@ -61,6 +61,7 @@ $selectedService = old('payment_service', request('payment_service', ''));
                     <select name="payment_service" id="payment_service" class="form-select @error('payment_service') is-invalid @enderror" required>
                         <option value="" {{ $selectedService === '' ? 'selected' : '' }}>-- Select Service --</option>
                         <option value="p23" {{ $selectedService === 'p23' ? 'selected' : '' }}>P-23 UPI</option>
+                        <option value="p24" {{ $selectedService === 'p24' ? 'selected' : '' }}>P-24 UPI ATM</option>
                     </select>
                     @error('payment_service')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -112,6 +113,7 @@ $selectedService = old('payment_service', request('payment_service', ''));
                 $company = $companiesByAccountId->get($settlement->accountId);
                 $provider = match ($settlement->payment_service) {
                     'p23' => 'UPI',
+                    'p24' => 'UPI ATM',
                     default => $settlement->payment_service ?: '-',
                 };
                 @endphp
@@ -148,6 +150,7 @@ $selectedService = old('payment_service', request('payment_service', ''));
         $company = $companiesByAccountId->get($settlement->accountId);
         $provider = match ($settlement->payment_service) {
             'p23' => 'UPI',
+            'p24' => 'UPI ATM',
             default => $settlement->payment_service ?: '-',
         };
         @endphp

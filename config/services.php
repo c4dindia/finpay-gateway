@@ -49,4 +49,9 @@ return [
         'payment_expiry_minutes' => '3',
     ],
 
+    'p24' => [
+        'payment_expiry_minutes' => '5',
+        'callback_url' => env('P24_CALLBACK_URL', 'https://payzone.finpay.group/api/atm-upi/notification'),
+    ],
+
 ];

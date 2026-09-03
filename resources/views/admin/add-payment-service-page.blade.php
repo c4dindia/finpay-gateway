@@ -35,6 +35,7 @@
                             <option value="Direpay">Direpay P-17</option>
                             <option value="UniqoPay">Uniqo Pay P-22</option> --}}
                             <option value="Upipay">P-23 UPI</option>
+                            <option value="Atompay">P-24 UPI ATM</option>
                         </select>
                     </div>
                     <label for="companyRedirectURL" class="form-label mb-0 mt-2 mt-md-4 p-2">Redirect URL</label>

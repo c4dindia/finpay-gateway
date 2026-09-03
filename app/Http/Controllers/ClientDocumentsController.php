@@ -26,6 +26,7 @@ use App\Models\UniqoPay;
 use App\Models\ValensPay;
 use App\Models\YaspaBanking;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AtomPay;
 use App\Models\UPIPayment;
 
 class ClientDocumentsController extends Controller
@@ -57,6 +58,7 @@ class ClientDocumentsController extends Controller
         $p21detail = Alikassa::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
         $p22detail = UniqoPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
         $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'midv2', 'midv3', 'status']);
+        $p24detail = AtomPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
         return view('client.documentations', compact(
             'p1detail',
             'p2detail',
@@ -80,7 +82,8 @@ class ClientDocumentsController extends Controller
             'p20detail',
             'p21detail',
             'p22detail',
-            'p23detail'
+            'p23detail',
+            'p24detail'
         ));
     }
 
@@ -351,5 +354,13 @@ class ClientDocumentsController extends Controller
         $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
 
         return view('client.p23-v3-docs-page');
+    }
+
+    public function p24DocPage()
+    {
+        $accId = Company::where('user_id', Auth::user()->id)->first()->accountId;
+        $p24detail = AtomPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
+
+        return view('client.p24-docs-page');
     }
 }

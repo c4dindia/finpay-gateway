@@ -36,6 +36,7 @@ use App\Http\Controllers\YaspaController;
 use App\Http\Controllers\UniqoPayController;
 use App\Http\Controllers\UpiPaymentController;
 use App\Http\Controllers\UpiV2Controller;
+use App\Http\Controllers\AtompayController;
 use App\Http\Controllers\UpiV3Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -188,6 +189,9 @@ Route::middleware(['bearer.token'])->group(function () {
     Route::post('/payment/{accId}/p23/v3/checkout', [UpiV3Controller::class, 'createCheckoutV3']);    //Upi Payin Checkout V3
     Route::get('/payment/{accId}/p23/v3/getPaymentStatus/{checkout_id}', [UpiV3Controller::class, 'getTransactionStatus']); //Upi v3 payment status
 
+    Route::post('/payment/{accId}/p24/checkout', [AtompayController::class, 'createCheckout']);    //Upi ATM Payin Checkout
+    Route::get('/payment/{accId}/p24/getPaymentStatus/{checkout_id}', [AtompayController::class, 'getTransactionStatus']); //Upi ATM payment status
+
     Route::post('/p3/generate-payment-link', [TransactionController::class, 'generateX1PaymentResponse']); //X1 Generate Payment Link
 });
 
@@ -217,6 +221,8 @@ Route::match(['get','post'],'/p22/notification', [UniqoPayController::class, 'ha
 
 Route::match(['get','post'],'/p23/payin/notification', [UpiPaymentController::class, 'payinNotification']); //Upi Payin Notification Handle
 Route::match(['get','post'],'/p23/payout/notification', [UpiPaymentController::class, 'payoutNotification']); //Upi Payout Notification Handle
+
+Route::match(['get','post'],'/atm-upi/notification', [AtompayController::class, 'handleNotification']);
 
 
 Route::get('/transvoucher/update/{status}/transactions',[TransvoucherController::class,'updatePaymentStatus']);

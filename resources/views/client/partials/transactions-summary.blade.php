@@ -14,6 +14,7 @@
         'p17' => 'P-17 Dire',
         'p22' => 'P-22 Uniqo',
         'p23' => 'P-23 UPI',
+        'p24' => 'P-24 UPI ATM',
     ];
     $serviceLabel = $serviceKey === 'all'
         ? 'All services'

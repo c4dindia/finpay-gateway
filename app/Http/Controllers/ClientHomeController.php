@@ -31,6 +31,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\AtomPay;
 use App\Models\UPIPayment;
 
 class ClientHomeController extends Controller
@@ -307,6 +308,7 @@ class ClientHomeController extends Controller
         $p21detail = Alikassa::where('accountId', $accId)->where('status', '=', '1')->first();
         $p22detail = UniqoPay::where('accountId', $accId)->where('status', '=', '1')->first();
         $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first();
+        $p24detail = AtomPay::where('accountId', $accId)->where('status', '=', '1')->first();
         return view('developersArea.index', compact(
             'p1detail',
             'p2detail',
@@ -331,6 +333,7 @@ class ClientHomeController extends Controller
             'p21detail',
             'p22detail',
             'p23detail',
+            'p24detail',
             'accId'
         ));
     }

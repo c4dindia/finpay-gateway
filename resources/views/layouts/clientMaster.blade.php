@@ -192,6 +192,14 @@
 <body>
     @php
         $accId = \App\Models\Company::where('user_id', Auth::id())->value('accountId');
+
+        // The payment link page needs an active P23 service with a v2 MID, otherwise
+        // it just aborts, so only show the nav item to companies that actually have it.
+        $hasUpiPaymentLinkV2 = \App\Models\UPIPayment::where('accountId', $accId)
+            ->where('status', '1')
+            ->whereNotNull('midv2')
+            ->where('midv2', '!=', '')
+            ->exists();
     @endphp
     {{-- Mobile nav bar --}}
     <nav class="navbar navbar-expand-lg d-flex fixed-top d-lg-none shadow-sm">
@@ -316,14 +324,16 @@
                     </a>
                 </li>
                 --}}
-                <li class="nav-item @if ($currentPage == 'Payment-Link') active @endif">
-                    <a class="nav-link" href="{{ route('p23-payment-link-v2') }}" target="_blank">
-                        <span class="fd-nav-ico" aria-hidden="true">
-                            {!! $figmaNavIcons['Payment-Link'] !!}
-                        </span>
-                        Payment Link v2
-                    </a>
-                </li>
+                @if ($hasUpiPaymentLinkV2)
+                    <li class="nav-item @if ($currentPage == 'Payment-Link') active @endif">
+                        <a class="nav-link" href="{{ route('p23-payment-link-v2') }}" target="_blank">
+                            <span class="fd-nav-ico" aria-hidden="true">
+                                {!! $figmaNavIcons['Payment-Link'] !!}
+                            </span>
+                            Payment Link v2
+                        </a>
+                    </li>
+                @endif
                 {{--
                 <li class="nav-item @if ($currentPage == 'Payment-Link') active @endif">
                     <a class="nav-link" href="{{ route('p23-payment-link-v3') }}" target="_blank">
@@ -399,12 +409,14 @@
                             </span>
                             Payment Link</a></li>
                     --}}
-                    <li class="nav-item trans-icon @if ($currentPage == 'Payment-Link') active @endif"><a
-                            class="nav-link" href="{{ route('p23-payment-link-v2') }}" target="_blank">
-                            <span class="fd-nav-ico" aria-hidden="true">
-                                {!! $figmaNavIcons['Payment-Link'] !!}
-                            </span>
-                            Payment Link v2</a></li>
+                    @if ($hasUpiPaymentLinkV2)
+                        <li class="nav-item trans-icon @if ($currentPage == 'Payment-Link') active @endif"><a
+                                class="nav-link" href="{{ route('p23-payment-link-v2') }}" target="_blank">
+                                <span class="fd-nav-ico" aria-hidden="true">
+                                    {!! $figmaNavIcons['Payment-Link'] !!}
+                                </span>
+                                Payment Link v2</a></li>
+                    @endif
                     {{--
                     <li class="nav-item trans-icon @if ($currentPage == 'Payment-Link') active @endif"><a
                             class="nav-link" href="{{ route('p23-payment-link-v3') }}" target="_blank">

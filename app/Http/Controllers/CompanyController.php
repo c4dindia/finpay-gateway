@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Alikassa;
+use App\Models\AtomPay;
 use App\Models\Company;
 use App\Models\Direpay;
 use App\Models\NiobiPayment;
@@ -588,6 +589,28 @@ class CompanyController extends Controller
             $p1->save();
 
             return redirect()->back()->with('success', 'P23 Payment Method for ' . $company->company_name);
+        } elseif ($request->selectPaymentPartner == 'Atompay') {
+            if (AtomPay::where('company_id', $company->id)->where('status', '1')->exists()) {
+                return redirect()->back()->with('error', 'This Service already Added!');
+            }
+
+            $apikey = Str::random(32);
+
+            do {
+                $token = Str::random(40);
+            } while (AtomPay::where('b_token', 'Bearer ' . $token . '==')->exists());
+
+            $p1 = new AtomPay();
+
+            $p1->accountId = $company->accountId;
+            $p1->company_id = $company->id;
+            $p1->redirect_url = $request->companyRedirectURL ?? null;
+            $p1->api_key = $apikey;
+            $p1->b_token = 'Bearer ' . $token . '==';
+
+            $p1->save();
+
+            return redirect()->back()->with('success', 'P24 Payment Method for ' . $company->company_name);
         } else {
             return redirect()->back()->with('error', 'Payment Method Not Found!');
         }
@@ -763,6 +786,12 @@ class CompanyController extends Controller
         return view('admin.p23services', compact('p23co', 'merchants', 'merchantsv2'));
     }
 
+    public function showAtompayService()
+    {
+        $p24co = AtomPay::orderBy('created_at', 'desc')->get();
+        return view('admin.p24services', compact('p24co'));
+    }
+
     public function showAllTransactions(Request $request)
     {
         $q       = trim((string) $request->query('q', ''));
@@ -913,6 +942,26 @@ class CompanyController extends Controller
             'vpa' => $request->vpa,
             'midv2' => $request->midv2 ?? null,
             'midv3' => $request->midv3 ?? null,
+            'status' => $request->status,
+        ]);
+
+        return back()->with('success', 'Company Details Updated!');
+    }
+
+    public function editAtompayCompanyDetails(Request $request)
+    {
+        $request->validate([
+            'company_id' => 'required|exists:atom_pays,id',
+            'auth_id' => 'nullable|string',
+            'auth_key' => 'nullable|string',
+            'status' => 'required|in:0,1',
+        ]);
+
+        $atompay = AtomPay::findOrFail($request->company_id);
+
+        $atompay->update([
+            'auth_id' => $request->auth_id ?? null,
+            'auth_key' => $request->auth_key ?? null,
             'status' => $request->status,
         ]);
 

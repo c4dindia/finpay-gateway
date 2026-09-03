@@ -122,6 +122,8 @@ $currentPage = 'Failed-Transactions';
               P22-(Uniqo)
               @elseif ($trans->status == 'p23')
               P23-(UPI)
+              @elseif ($trans->status == 'p24')
+              P24-(UPI ATM)
               @endif
             </td>
 

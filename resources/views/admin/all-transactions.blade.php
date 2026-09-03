@@ -73,6 +73,7 @@ $currentPage = 'All Transactions';
                         <option value="p17" {{ $selectedService === 'p17' ? 'selected' : '' }}>P-17 Dire</option>
                         <option value="p22" {{ $selectedService === 'p22' ? 'selected' : '' }}>P-22 Uniqo Pay</option> --}}
                         <option value="p23" {{ $selectedService === 'p23' ? 'selected' : '' }}>P-23 UPI</option>
+                        <option value="p24" {{ $selectedService === 'p24' ? 'selected' : '' }}>P-24 UPI ATM</option>
                     </select>
                 </div>
             </form>
@@ -193,6 +194,7 @@ $currentPage = 'All Transactions';
                                 'p17' => 'Dire Pay',
                                 'p22' => 'Uniqo Pay',
                                 'p23' => 'UPI',
+                                'p24' => 'UPI ATM',
                                 default => '',
                                 };
                                 @endphp

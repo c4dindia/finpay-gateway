@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UpiPaymentController;
 use App\Http\Controllers\UpiV2Controller;
 use App\Http\Controllers\UpiV3Controller;
+use App\Http\Controllers\AtompayController;
 
 /*
 |--------------------------------------------------------------------------
@@ -116,7 +117,10 @@ Route::middleware(['auth','check.status'])->group(function () {
     Route::get('/admin/p23-services/merchants/delete/{id}',[CompanyController::class,'deleteUpipayMerchant'])->name('delete-p23merchant');
     Route::post('/admin/p23-services/merchants/delete-all',[CompanyController::class,'deleteAllUpipayMerchants'])->name('deleteAll-p23merchants');
     Route::get('/admin/p23-merchants/generate-link/{merchant_id}',[CompanyController::class,'generateUpipayMerchantLink'])->name('generate-p23merchant-link');
-    
+
+    Route::get('/admin/p24-services',[CompanyController::class,'showAtompayService'])->name('showAtompayService');
+    Route::post('/admin/p24-services/edit',[CompanyController::class,'editAtompayCompanyDetails'])->name('edit-p24service');
+
     Route::get('/admin/all-transactions',[CompanyController::class,'showAllTransactions'])->name('showAllTransactions');
     Route::get('/admin/all-declined-transactions',[CompanyController::class,'showAllFailedTransactions'])->name('showAllFailedTransactions');
     Route::post('/admin/download/transactions',[TransactionController::class,'downloadCompanyTransactions'])->name('downloadCompanyTransactions');
@@ -172,6 +176,7 @@ Route::group(['prefix' => '/user', 'middleware' => ['auth','check.client.status'
     Route::get('/documentations/p23-payout-service', [ClientDocumentsController::class,'p23PayoutDocPage'])->name('p23PayoutDocPage');
     Route::get('/documentations/p23-payin-v2-service', [ClientDocumentsController::class,'p23v2DocPage'])->name('p23v2DocPage');
     Route::get('/documentations/p23-payin-v3-service', [ClientDocumentsController::class,'p23v3DocPage'])->name('p23v3DocPage');
+    Route::get('/documentations/p24-service', [ClientDocumentsController::class,'p24DocPage'])->name('p24DocPage');
 
 });
 
@@ -256,6 +261,11 @@ Route::get('/p23/payment-status/{checkout_id}', [UpiPaymentController::class, 'g
 Route::get('/p23/payment-status/v2/{checkout_id}', [UpiV2Controller::class, 'getPayinStatus'])->name('p23.payment.status.v2');
 Route::get('/p23/payment-status/v3/{checkout_id}', [UpiV3Controller::class, 'getPayinStatus'])->name('p23.payment.status.v3');
 Route::get('/p23/payment-expired/{checkout_id}', [UpiPaymentController::class, 'markPayinExpired'])->name('p23.payment.expired');
+
+// upi atm payment
+Route::get('/p24/payment/{checkout_id}', [AtompayController::class, 'paymentPage'])->name('p24.payment.page');
+Route::get('/p24/payment-status/{checkout_id}', [AtompayController::class, 'getPayinStatus'])->name('p24.payment.status');
+Route::get('/p24/payment-expired/{checkout_id}', [AtompayController::class, 'markPayinExpired'])->name('p24.payment.expired');
 
 Route::get('/p23/payment-link', [UpiPaymentController::class, 'paymentLink'])->name('p23-payment-link');
 Route::get('/p23/payment-link/v2', [UpiV2Controller::class, 'paymentLink'])->name('p23-payment-link-v2');
