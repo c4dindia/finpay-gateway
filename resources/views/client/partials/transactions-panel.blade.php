@@ -12,6 +12,7 @@
         'p22' => ['label' => 'P-22 Uniqo', 'model' => \App\Models\UniqoPay::class],
         'p23' => ['label' => 'P-23 UPI', 'model' => \App\Models\UPIPayment::class],
         'p24' => ['label' => 'P-24 UPI ATM', 'model' => \App\Models\AtomPay::class],
+        'p25' => ['label' => 'P-25 UPI PYN', 'model' => \App\Models\PaynoraPayment::class],
     ];
 @endphp
 <div class="col-12 fd-trans-panel ps-lg-2 pe-lg-0">

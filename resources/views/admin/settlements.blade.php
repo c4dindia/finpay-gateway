@@ -62,6 +62,7 @@ $selectedService = old('payment_service', request('payment_service', ''));
                         <option value="" {{ $selectedService === '' ? 'selected' : '' }}>-- Select Service --</option>
                         <option value="p23" {{ $selectedService === 'p23' ? 'selected' : '' }}>P-23 UPI</option>
                         <option value="p24" {{ $selectedService === 'p24' ? 'selected' : '' }}>P-24 UPI ATM</option>
+                        <option value="p25" {{ $selectedService === 'p25' ? 'selected' : '' }}>P-25 UPI PYN</option>
                     </select>
                     @error('payment_service')
                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -114,6 +115,7 @@ $selectedService = old('payment_service', request('payment_service', ''));
                 $provider = match ($settlement->payment_service) {
                     'p23' => 'UPI',
                     'p24' => 'UPI ATM',
+                    'p25' => 'UPI PYN',
                     default => $settlement->payment_service ?: '-',
                 };
                 @endphp
@@ -151,6 +153,7 @@ $selectedService = old('payment_service', request('payment_service', ''));
         $provider = match ($settlement->payment_service) {
             'p23' => 'UPI',
             'p24' => 'UPI ATM',
+            'p25' => 'UPI PYN',
             default => $settlement->payment_service ?: '-',
         };
         @endphp

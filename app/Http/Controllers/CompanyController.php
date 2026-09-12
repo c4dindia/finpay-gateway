@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Alikassa;
 use App\Models\AtomPay;
+use App\Models\PaynoraPayment;
 use App\Models\Company;
 use App\Models\Direpay;
 use App\Models\NiobiPayment;
@@ -611,6 +612,28 @@ class CompanyController extends Controller
             $p1->save();
 
             return redirect()->back()->with('success', 'P24 Payment Method for ' . $company->company_name);
+        } elseif ($request->selectPaymentPartner == 'Paynora') {
+            if (PaynoraPayment::where('company_id', $company->id)->where('status', '1')->exists()) {
+                return redirect()->back()->with('error', 'This Service already Added!');
+            }
+
+            $apikey = Str::random(32);
+
+            do {
+                $token = Str::random(40);
+            } while (PaynoraPayment::where('b_token', 'Bearer ' . $token . '==')->exists());
+
+            $p1 = new PaynoraPayment();
+
+            $p1->accountId = $company->accountId;
+            $p1->company_id = $company->id;
+            $p1->redirect_url = $request->companyRedirectURL ?? null;
+            $p1->api_key = $apikey;
+            $p1->b_token = 'Bearer ' . $token . '==';
+
+            $p1->save();
+
+            return redirect()->back()->with('success', 'P25 Payment Method for ' . $company->company_name);
         } else {
             return redirect()->back()->with('error', 'Payment Method Not Found!');
         }
@@ -790,6 +813,12 @@ class CompanyController extends Controller
     {
         $p24co = AtomPay::orderBy('created_at', 'desc')->get();
         return view('admin.p24services', compact('p24co'));
+    }
+
+    public function showPaynoraService()
+    {
+        $p25co = PaynoraPayment::orderBy('created_at', 'desc')->get();
+        return view('admin.p25services', compact('p25co'));
     }
 
     public function showAllTransactions(Request $request)

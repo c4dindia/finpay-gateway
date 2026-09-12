@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\AtomPay;
 use App\Models\Direpay;
+use App\Models\PaynoraPayment;
 use App\Models\PaytoroPayment;
 use App\Models\PEightPaymentMethod;
 use App\Models\PFivePaymentMethod;
@@ -199,6 +200,10 @@ class BearerTokenMiddleware
         }
 
         if(AtomPay::where('b_token',$token)->where('status','1')->exists()){
+            return true;
+        }
+
+        if(PaynoraPayment::where('b_token',$token)->where('status','1')->exists()){
             return true;
         }
 

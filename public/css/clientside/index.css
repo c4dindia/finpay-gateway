@@ -2211,6 +2211,25 @@ html.is-dark .fd-trans-export-modal .fd-trans-export-submit:active {
     color: rgba(255, 255, 255, 0.78);
 }
 
+/* Code blocks that sit inside a step body: the dark mode ".body span" rule above
+   outranks the token colors, so restate them with matching specificity. */
+.fd-root.is-dark .progress-vertical .body .pink-text {
+    color: #d946ef;
+}
+
+.fd-root.is-dark .progress-vertical .body .yellow-text {
+    color: #f59e0b;
+}
+
+.fd-root.is-dark .progress-vertical .body .comment-text {
+    color: #22c55e;
+}
+
+.fd-root.is-dark .progress-vertical .body .blue-text-color,
+.fd-root.is-dark .progress-vertical .body .box-text-secondary {
+    color: rgba(255, 255, 255, 0.78);
+}
+
 /* Copy button polish (works with existing markup) */
 .fd-root .copy-btn {
     width: 34px;

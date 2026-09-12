@@ -499,6 +499,7 @@ Overview · {{ \Carbon\Carbon::now()->format('M j, Y') }}
         'p22' => ['label' => 'P-22 Uniqo', 'model' => \App\Models\UniqoPay::class],
         'p23' => ['label' => 'P-23 UPI', 'model' => \App\Models\UPIPayment::class],
         'p24' => ['label' => 'P-24 UPI ATM', 'model' => \App\Models\AtomPay::class],
+        'p25' => ['label' => 'P-25 UPI PYN', 'model' => \App\Models\PaynoraPayment::class],
     ];
     foreach ($services as $key => $service) {
         if ($company && $service['model']::where('company_id', $company->id)->where('status', 1)->exists()) {

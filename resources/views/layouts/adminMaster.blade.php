@@ -201,6 +201,9 @@
                         <li class="nav-item @if ($currentPage == 'P24 Services') active @endif">
                             <a class="nav-link" href="{{ route('showAtompayService') }}"><i class="fa-solid fa-credit-card"></i>&nbsp; P24 Services</a>
                         </li>
+                        <li class="nav-item @if ($currentPage == 'P25 Services') active @endif">
+                            <a class="nav-link" href="{{ route('showPaynoraService') }}"><i class="fa-solid fa-credit-card"></i>&nbsp; P25 Services</a>
+                        </li>
                         <li class="nav-item @if ($currentPage == 'Manage VPAs') active @endif">
                             <a class="nav-link" href="{{ route('showUpipayMerchants') }}"><i class="fa-solid fa-credit-card"></i>&nbsp; Manage VPAs</a>
                         </li>
@@ -244,6 +247,9 @@
                 </li>
                 <li class="nav-item @if ($currentPage == 'P24 Services') active @endif">
                     <a class="nav-link" href="{{ route('showAtompayService') }}"><i class="fa-solid fa-credit-card"></i>&nbsp; P24 Services</a>
+                </li>
+                <li class="nav-item @if ($currentPage == 'P25 Services') active @endif">
+                    <a class="nav-link" href="{{ route('showPaynoraService') }}"><i class="fa-solid fa-credit-card"></i>&nbsp; P25 Services</a>
                 </li>
                 <li class="nav-item @if ($currentPage == 'Manage VPAs') active @endif">
                     <a class="nav-link" href="{{ route('showUpipayMerchants') }}"><i class="fa-solid fa-credit-card"></i>&nbsp; Manage VPAs</a>

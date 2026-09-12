@@ -75,6 +75,7 @@ $currentPage = 'All Declined Transactions';
             <option value="p22" {{ $selectedService === 'p22' ? 'selected' : '' }}>P-22 Uniqo Pay</option> --}}
             <option value="p23" {{ $selectedService === 'p23' ? 'selected' : '' }}>P-23 UPI</option>
             <option value="p24" {{ $selectedService === 'p24' ? 'selected' : '' }}>P-24 UPI ATM</option>
+            <option value="p25" {{ $selectedService === 'p25' ? 'selected' : '' }}>P-25 UPI PYN</option>
           </select>
         </div>
       </form>
@@ -175,6 +176,7 @@ $currentPage = 'All Declined Transactions';
                 'p22' => 'Uniqo Pay',
                 'p23' => 'UPI',
                 'p24' => 'UPI ATM',
+                'p25' => 'UPI PYN',
                 default => '',
                 };
                 @endphp

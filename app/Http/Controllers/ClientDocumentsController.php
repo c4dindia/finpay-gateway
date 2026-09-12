@@ -27,6 +27,7 @@ use App\Models\ValensPay;
 use App\Models\YaspaBanking;
 use Illuminate\Support\Facades\Auth;
 use App\Models\AtomPay;
+use App\Models\PaynoraPayment;
 use App\Models\UPIPayment;
 
 class ClientDocumentsController extends Controller
@@ -59,6 +60,7 @@ class ClientDocumentsController extends Controller
         $p22detail = UniqoPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
         $p23detail = UPIPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'midv2', 'midv3', 'status']);
         $p24detail = AtomPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
+        $p25detail = PaynoraPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
         return view('client.documentations', compact(
             'p1detail',
             'p2detail',
@@ -83,7 +85,8 @@ class ClientDocumentsController extends Controller
             'p21detail',
             'p22detail',
             'p23detail',
-            'p24detail'
+            'p24detail',
+            'p25detail'
         ));
     }
 
@@ -362,5 +365,13 @@ class ClientDocumentsController extends Controller
         $p24detail = AtomPay::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
 
         return view('client.p24-docs-page');
+    }
+
+    public function p25DocPage()
+    {
+        $accId = Company::where('user_id', Auth::user()->id)->first()->accountId;
+        $p25detail = PaynoraPayment::where('accountId', $accId)->where('status', '=', '1')->first(['accountId', 'status']);
+
+        return view('client.p25-docs-page');
     }
 }
